@@ -1,0 +1,24 @@
+{
+  "itemGroup.examplemod": "Example Mod Tab",
+  "block.examplemod.example_block": "Example Block",
+  "item.examplemod.example_item": "Example Item",
+
+  "command.settlements.add_town.success": "已经创建城镇§n%s§r。",
+  "command.settlements.list_town.success": "有%s个城镇：%s",
+  "command.settlements.list_town.no_elements": "这个世界没有城镇。",
+  "command.settlements.town.build.success": "建筑成功放置",
+  "command.settlements.town.build.failed_set": "无法放置建筑。",
+  "command.settlements.town.build.failed_grid_occupied": "格子%s被占用，无法放置建筑。",
+  "command.settlements.town.build.failed_ground_not_flat": "地不平，无法确定地面高度。",
+  "command.settlements.town.buildings.head": "城镇§n%s§r(%s)：",
+  "command.settlements.town.buildings.no_elements": "城镇§n%s§r(%s)没有建筑。",
+  "command.settlements.err.town_not_found": "在(%s)的城镇未找到。",
+  "command.settlements.err.source_null": "Source null.",
+  "command.settlements.town.building.null": "在(%s)，城镇§n%s§r(%s)没有建筑。",
+  "command.settlements.town.terrain.null": "在(%s)，城镇§n%s§r(%s)没有地形。",
+  "command.settlements.town.test_building.empty": "测试失败。",
+
+  "display.settlements.building.name.road": "马路",
+  "display.settlements.building.name.farmstead": "农庄",
+  "display.settlements.building.name.farm_field": "农田"
+}

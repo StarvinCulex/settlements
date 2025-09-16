@@ -1,0 +1,24 @@
+{
+  "itemGroup.examplemod": "Example Mod Tab",
+  "block.examplemod.example_block": "Example Block",
+  "item.examplemod.example_item": "Example Item",
+
+  "command.settlements.add_town.success": "Created town §n%s§r.",
+  "command.settlements.list_town.success": "There are %s towns: %s",
+  "command.settlements.list_town.no_elements": "There is no town in this world.",
+  "command.settlements.town.build.success": "Building set successfully.",
+  "command.settlements.town.build.failed_set": "Cannot set building.",
+  "command.settlements.town.build.failed_grid_occupied": "Cannot set building because of occupied grid %s.",
+  "command.settlements.town.build.failed_ground_not_flat": "Cannot measure the altitude of building because the ground is not flat.",
+  "command.settlements.town.buildings.head": "Town §n%s§r(%s):",
+  "command.settlements.town.buildings.no_elements": "Town §n%s§r(%s) has no building.",
+  "command.settlements.town.terrain.null": "There is no terrain at (%s) in town §n%s§r(%s).",
+  "command.settlements.town.building.null": "There is no building at (%s) in town §n%s§r(%s).",
+  "command.settlements.err.town_not_found": "Town at (%s) not found.",
+  "command.settlements.err.source_null": "Source null.",
+  "command.settlements.town.test_building.empty": "Test failed.",
+
+  "display.settlements.building.name.road": "road",
+  "display.settlements.building.name.farmstead": "farmstead",
+  "display.settlements.building.name.farm_field": "farm field"
+}
