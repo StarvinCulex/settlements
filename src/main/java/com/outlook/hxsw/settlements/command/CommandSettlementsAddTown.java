@@ -56,7 +56,7 @@ public class CommandSettlementsAddTown extends CommandSettlements {
             x = (int) Math.floor(pos.x);
             z = (int) Math.floor(pos.z);
         }
-        data.addTown(new Town(data.generateTownID(), name, new Vec3i(x, 0, z), context.getSource().getLevel().dimension()));
+        data.towns.makeChild(name, new Vec3i(x, 0, z), context.getSource().getLevel().dimension());
         context.getSource().sendSystemMessage(Component.translatable("command.settlements.add_town.success", name, x, z));
         return 0;
     }

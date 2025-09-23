@@ -1,12 +1,10 @@
 package com.outlook.hxsw.settlements.command;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.outlook.hxsw.settlements.engine.data.Town;
-import com.outlook.hxsw.settlements.utils.grid.Grid;
-import com.outlook.hxsw.settlements.utils.grid.GridTerrain;
+import com.outlook.hxsw.settlements.engine.grid.Grid;
+import com.outlook.hxsw.settlements.engine.grid.GridTerrain;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -15,22 +13,16 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-public class CommandSettlementsGetTerrain extends CommandSettlementsTown {
+public class CommandSettlementsTownGetTerrain extends CommandSettlementsTown {
     private static final String POSITION = "position";
 
     @SubscribeEvent
     public void onServerStarting(RegisterCommandsEvent event) {
-        var cmdSub = Commands.literal("get").then(
+        registerCommand(event, Commands.literal("get").then(
                 Commands.literal("terrain").executes(this).then(
                         Commands.argument(POSITION, BlockPosArgument.blockPos())
                                 .executes(this)
                 )
-        );
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-
-        dispatcher.register(Commands.literal("settlements").then(cmdSub));
-        dispatcher.register(Commands.literal("settlements").then(
-                Commands.argument(TOWN_ID, IntegerArgumentType.integer()).then(cmdSub)
         ));
     }
 

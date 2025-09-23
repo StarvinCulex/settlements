@@ -1,10 +1,8 @@
 package com.outlook.hxsw.settlements.command;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.outlook.hxsw.settlements.engine.data.Town;
 import com.outlook.hxsw.settlements.engine.data.SettlementsData;
 import net.minecraft.commands.CommandSourceStack;
@@ -21,26 +19,21 @@ public class CommandSettlementsListTown extends CommandSettlements {
 
     @SubscribeEvent
     public void onServerStarting(RegisterCommandsEvent event) {
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        LiteralCommandNode<CommandSourceStack> cmd = dispatcher.register(
-                Commands.literal("settlements").then(
-                        Commands.literal("list").then(
-                                Commands.literal("towns").executes(INSTANCE)
-                        )
-                )
-        );
+        registerCommand(event, Commands.literal("list").then(
+                Commands.literal("towns").executes(INSTANCE)
+        ));
     }
 
     @Override
     public int run(CommandContext<CommandSourceStack> commandContext, SettlementsData data) throws CommandSyntaxException {
-        Collection<Town> towns = data.getTowns().values();
+        Collection<Town> towns = data.towns.getChildrenList();
         MutableComponent message;
         if (towns.isEmpty()) {
             message = Component.translatable("command.settlements.list_town.no_elements");
         } else {
             StringBuilder sb = new StringBuilder();
             for (Town t : towns) {
-                sb.append("\n  %s #%d".formatted(t.getName(), t.getID()));
+                sb.append("\n  %s".formatted(t));
             }
             message = Component.translatable("command.settlements.list_town.success", String.valueOf(towns.size()), sb.toString());
         }

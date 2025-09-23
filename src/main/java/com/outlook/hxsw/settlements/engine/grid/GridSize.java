@@ -1,4 +1,4 @@
-package com.outlook.hxsw.settlements.utils.grid;
+package com.outlook.hxsw.settlements.engine.grid;
 
 import com.google.common.base.MoreObjects;
 import com.mojang.serialization.Codec;

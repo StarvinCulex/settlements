@@ -2,7 +2,7 @@ package com.outlook.hxsw.settlements.building.utils.filter;
 
 import com.outlook.hxsw.settlements.engine.buildings.BuildingArgument;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
-import com.outlook.hxsw.settlements.utils.grid.GridSide;
+import com.outlook.hxsw.settlements.engine.grid.GridSide;
 
 import java.util.Arrays;
 import java.util.stream.Stream;

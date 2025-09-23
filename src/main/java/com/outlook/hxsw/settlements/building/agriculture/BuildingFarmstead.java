@@ -7,7 +7,7 @@ import com.outlook.hxsw.settlements.building.utils.BasicBuilding;
 import com.outlook.hxsw.settlements.building.utils.StructurePattern;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -16,8 +16,8 @@ public final class BuildingFarmstead extends BasicBuilding<BuildingFarmstead.Typ
     public static final int MASTERING_DISTANCE = 16;
     public static final int INCOMPATIBLE_DISTANCE = MASTERING_DISTANCE * 2 + 4;
 
-    private BuildingFarmstead(Type pattern, ConnectionArgument<FacingArgument<BuildingLocation<GridRegion>>> location) {
-        super(pattern, location.inner(), pattern.getName());
+    private BuildingFarmstead(int id, Type pattern, ConnectionArgument<FacingArgument<BuildingLocation<GridRegion>>> location) {
+        super(id, pattern, location.inner(), pattern.getName());
     }
 
     private BuildingFarmstead(BasicProperties properties) {
@@ -88,8 +88,8 @@ public final class BuildingFarmstead extends BasicBuilding<BuildingFarmstead.Typ
         }
 
         @Override
-        public BuildingFarmstead make(ConnectionArgument<FacingArgument<BuildingLocation<GridRegion>>> args) {
-            return new BuildingFarmstead(this, args);
+        public BuildingFarmstead make(int id, ConnectionArgument<FacingArgument<BuildingLocation<GridRegion>>> args) {
+            return new BuildingFarmstead(id, this, args);
         }
 
         @Override

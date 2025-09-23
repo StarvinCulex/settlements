@@ -2,7 +2,7 @@ package com.outlook.hxsw.settlements.building.utils.stock;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.outlook.hxsw.settlements.goods.Sellable;
+import com.outlook.hxsw.settlements.engine.goods.Sellable;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -35,12 +35,12 @@ public class ScheduleController implements Scheduler {
     }
 
     public void sidecarTick() {
-        run(sidecar::tick);
+        run(ScheduleController.Data::tick);
     }
 
     @Override
-    public void run(Consumer<Scheduler.Sidecar> sidecarTask) {
-        sidecarTaskQueue.add(sidecarTask);
+    public void run(Consumer<Scheduler.Data> dataTask) {
+        sidecarTaskQueue.add(dataTask);
     }
 
     @Override
@@ -63,18 +63,18 @@ public class ScheduleController implements Scheduler {
         return currentPhase;
     }
 
-    protected Scheduler.Sidecar getSidecar() {
+    protected Scheduler.Data getSidecar() {
         return Objects.requireNonNull(sidecar);
     }
 
-    private final Sidecar sidecar = new Sidecar();
+    private final Data sidecar = new Data();
     private final SettlementsData data;
     private final ReentrantLock dataLock = new ReentrantLock(true);
     private volatile boolean needPause = false;
     private volatile boolean needStop = false;
     private volatile int currentPhase;
 
-    private final BlockingQueue<Consumer<Scheduler.Sidecar>> sidecarTaskQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Consumer<Scheduler.Data>> sidecarTaskQueue = new LinkedBlockingQueue<>();
     private final TransferQueue<ServerTask> serverTaskQueue = new LinkedTransferQueue<>();
     private final Set<ServerTask> serverTaskBuffer = ConcurrentHashMap.newKeySet();
 
@@ -142,19 +142,19 @@ public class ScheduleController implements Scheduler {
             return ScheduleController.this.getPhase();
         }
         @Override
-        public void run(Consumer<Scheduler.Sidecar> sidecarTask) {
-            ScheduleController.this.run(sidecarTask);
+        public void run(Consumer<Scheduler.Data> dataTask) {
+            ScheduleController.this.run(dataTask);
         }
     }
 
-    private class Sidecar implements Scheduler.Sidecar {
-        private final Queue<Consumer<Sidecar>> localQueue = new ArrayDeque<>();
+    private class Data implements Scheduler.Data {
+        private final Queue<Consumer<Data>> localQueue = new ArrayDeque<>();
         @SuppressWarnings("unchecked")
         private final List<Optional<SidecarTimer>>[] timerWheel = new ArrayList[TIMER_WHEEL_SIZE];
         private int localPhase;
         private Runner runner = null;
 
-        Sidecar() {
+        Data() {
             this.localPhase = currentPhase;
         }
 
@@ -173,6 +173,10 @@ public class ScheduleController implements Scheduler {
         }
 
         private class Runner extends Thread {
+            public Runner() {
+                super("SettlementsSidecarRunner");
+            }
+
             @Override
             public void run() {
                 try {
@@ -180,7 +184,7 @@ public class ScheduleController implements Scheduler {
                         var task = sidecarTaskQueue.take();
                         dataLock.lock();
                         try {
-                            task.accept(ScheduleController.Sidecar.this);
+                            task.accept(ScheduleController.Data.this);
                             consumeFromLocalQueue();
                         } finally {
                             dataLock.unlock();
@@ -190,7 +194,11 @@ public class ScheduleController implements Scheduler {
             }
         }
 
-        private void tick(Scheduler.Sidecar s) {
+        private static void tick(Scheduler.Data scheduler) {
+            ((ScheduleController.Data) scheduler).tick();
+        }
+
+        private void tick() {
             try {
                 executeTimer();
                 consumeFromLocalQueue();
@@ -262,8 +270,8 @@ public class ScheduleController implements Scheduler {
         }
 
         @Override
-        public void run(Consumer<Sidecar> sidecarTask) {
-            localQueue.add(sidecarTask);
+        public void run(Consumer<Scheduler.Data> dataTask) {
+            localQueue.add(dataTask);
         }
 
         @Override

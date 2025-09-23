@@ -6,7 +6,7 @@ import com.outlook.hxsw.settlements.building.RegisteredBuildings;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public interface BuildingType<B extends Buildable> {
+public interface BuildingType<B extends Building> {
     String getName();
     String getDisplayKey();
 

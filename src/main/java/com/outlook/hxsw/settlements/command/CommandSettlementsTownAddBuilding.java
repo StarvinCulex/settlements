@@ -1,13 +1,11 @@
 package com.outlook.hxsw.settlements.command;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.outlook.hxsw.settlements.engine.buildings.BuildingType;
+import com.outlook.hxsw.settlements.engine.buildings.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.data.Town;
-import com.outlook.hxsw.settlements.utils.grid.Grid;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -17,30 +15,27 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class CommandSettlementsTestBuild extends CommandSettlementsTown {
+public class CommandSettlementsTownAddBuilding extends CommandSettlementsTown {
     private static final String BUILDING_TYPE = "building_type";
     private static final String POSITION = "position";
+
     @SubscribeEvent
     public void onServerStarting(RegisterCommandsEvent event) {
-        var cmdSub = Commands.literal("test").requires(src -> src.hasPermission(4))
-                .then(
-                        Commands.literal("build").then(
-                                Commands.argument(BUILDING_TYPE, StringArgumentType.word())
-                                        .executes(this)
-                                        .then(
-                                                Commands.argument(POSITION, BlockPosArgument.blockPos())
-                                                        .executes(this)
-                                        )
+        registerCommand(event,
+                Commands.literal("add")
+                        .requires(src -> src.hasPermission(4))
+                        .then(
+                                Commands.literal("building").then(
+                                        Commands.argument(BUILDING_TYPE, StringArgumentType.word())
+                                                .executes(this)
+                                                .then(
+                                                        Commands.argument(POSITION, BlockPosArgument.blockPos())
+                                                                .executes(this)
+                                                )
+                                )
                         )
-                );
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-
-        dispatcher.register(Commands.literal("settlements").then(cmdSub));
-        dispatcher.register(Commands.literal("settlements").then(
-                Commands.argument(TOWN_ID, IntegerArgumentType.integer()).then(cmdSub)
-        ));
+        );
     }
 
     @Override
@@ -63,14 +58,13 @@ public class CommandSettlementsTestBuild extends CommandSettlementsTown {
             );
         }
 
-        var placingArgs = buildingType.getFactory().filter(town.buildings(), Stream.of(new Grid(executeAt))).toList();
-        if (placingArgs.isEmpty()) {
-            context.getSource().sendSystemMessage(Component.translatable("command.settlements.town.test_building.empty"));
-            return 0;
+        boolean failed = town.buildings().makeAndPlace(buildingType.getFactory(), new Grid(executeAt)).isEmpty();
+        if (failed) {
+            context.getSource().sendSystemMessage(Component.translatable("command.settlements.town.build.failed_set"));
+            return 1;
         }
-        for (var arg : placingArgs) {
-            context.getSource().sendSystemMessage(Component.literal(arg.toString()));
-        }
+
+        context.getSource().sendSystemMessage(Component.translatable("command.settlements.town.build.success"));
         return 0;
     }
 }

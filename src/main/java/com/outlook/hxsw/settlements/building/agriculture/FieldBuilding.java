@@ -7,11 +7,10 @@ import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 import com.outlook.hxsw.settlements.engine.schedule.SidecarTimer;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -19,12 +18,14 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     private @Nullable SidecarTimer timer = null;
 
     protected FieldBuilding(
+            int id,
             P variant,
             NearArgument<ConnectionArgument<BuildingLocation<GridCell>>> arg,
             String name
     ) {
         super(variant.getDeclaringClass(), new FieldProperty(
-                arg.neighbors().stream().findFirst().orElseThrow().getUUID(),
+                id,
+                arg.neighbors().stream().findFirst().orElseThrow().getID(),
                 arg.inner().inner(),
                 name,
                 variant.name()
@@ -41,7 +42,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     }
 
     public Optional<Harvester> getHarvester() {
-        var b = getParent().get(getProperties().harvesterUUID);
+        var b = getParent().get(getProperties().harvesterID);
         if (b.isPresent() && b.get() instanceof Harvester h) {
             return Optional.of(h);
         }
@@ -57,7 +58,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     }
 
     @Override
-    public void registerToSidecar(Scheduler.Sidecar scheduler) {
+    public void registerToSidecar(Scheduler.Data scheduler) {
         super.registerToSidecar(scheduler);
         if (timer == null) {
             if (getProperties().timerPhase == null) {
@@ -68,7 +69,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
         scheduler.register(timer);
     }
 
-    private void tick(Scheduler.Sidecar scheduler) {
+    private void tick(Scheduler.Data scheduler) {
         if (getProperties().growStage >= getType().growMaxStage()) {
             return;
         }
@@ -116,31 +117,32 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     public static class FieldProperty extends ConnectiveProperties {
         private Integer timerPhase;
         private int growStage;
-        private UUID harvesterUUID;
+        private int harvesterID;
 
         protected FieldProperty(
-                UUID harvesterUUID,
+                int id,
+                int harvesterID,
                 BuildingLocation<GridCell> location,
                 String name,
                 String buildingPattern
         ) {
-            super(location, name, buildingPattern);
+            super(id, location, name, buildingPattern);
             this.timerPhase = null;
-            this.growStage = 0;
-            this.harvesterUUID = harvesterUUID;
+            this.growStage = -1;
+            this.harvesterID = harvesterID;
         }
 
-        protected FieldProperty(Optional<Integer> timerPhase, int growStage, UUID harvesterUUID, ConnectiveProperties prop) {
+        protected FieldProperty(Optional<Integer> timerPhase, int growStage, int harvesterID, ConnectiveProperties prop) {
             super(prop);
             this.timerPhase = timerPhase.orElse(null);
             this.growStage = growStage;
-            this.harvesterUUID = harvesterUUID;
+            this.harvesterID = harvesterID;
         }
 
         public static Codec<FieldProperty> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.INT.optionalFieldOf("timerPhase").forGetter(p -> Optional.ofNullable(p.timerPhase)),
                 Codec.INT.fieldOf("growStage").forGetter(p -> p.growStage),
-                Codec.STRING.xmap(UUID::fromString, UUID::toString).fieldOf("harvesterUUID").forGetter(p -> p.harvesterUUID),
+                Codec.INT.fieldOf("harvesterID").forGetter(p -> p.harvesterID),
                 ConnectiveProperties.CODEC.fieldOf("connectiveProperties").forGetter(p -> p)
         ).apply(instance, FieldProperty::new));
     }

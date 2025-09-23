@@ -1,13 +1,11 @@
 package com.outlook.hxsw.settlements.command;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.buildings.BuildingType;
 import com.outlook.hxsw.settlements.engine.data.Town;
+import com.outlook.hxsw.settlements.engine.grid.Grid;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -17,30 +15,27 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class CommandSettlementsAddBuilding extends CommandSettlementsTown {
+public class CommandSettlementsTownTestBuild extends CommandSettlementsTown {
     private static final String BUILDING_TYPE = "building_type";
     private static final String POSITION = "position";
-
     @SubscribeEvent
     public void onServerStarting(RegisterCommandsEvent event) {
-        var cmdSub = Commands.literal("add").requires(src -> src.hasPermission(4))
-            .then(
-                    Commands.literal("building").then(
-                            Commands.argument(BUILDING_TYPE, StringArgumentType.word())
-                                    .executes(this)
-                                    .then(
-                                            Commands.argument(POSITION, BlockPosArgument.blockPos())
-                                                    .executes(this)
-                                    )
-                    )
-            );
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-
-        dispatcher.register(Commands.literal("settlements").then(cmdSub));
-        dispatcher.register(Commands.literal("settlements").then(
-                Commands.argument(TOWN_ID, IntegerArgumentType.integer()).then(cmdSub)
-        ));
+        registerCommand(event,
+                Commands.literal("test")
+                        .requires(src -> src.hasPermission(4))
+                        .then(
+                                Commands.literal("build").then(
+                                        Commands.argument(BUILDING_TYPE, StringArgumentType.word())
+                                                .executes(this)
+                                                .then(
+                                                        Commands.argument(POSITION, BlockPosArgument.blockPos())
+                                                                .executes(this)
+                                                )
+                                )
+                        )
+        );
     }
 
     @Override
@@ -63,13 +58,14 @@ public class CommandSettlementsAddBuilding extends CommandSettlementsTown {
             );
         }
 
-        boolean failed = town.buildings().makeAndPlace(buildingType.getFactory(), new Grid(executeAt)).isEmpty();
-        if (failed) {
-            context.getSource().sendSystemMessage(Component.translatable("command.settlements.town.build.failed_set"));
-            return 1;
+        var placingArgs = buildingType.getFactory().filter(town.buildings(), Stream.of(new Grid(executeAt))).toList();
+        if (placingArgs.isEmpty()) {
+            context.getSource().sendSystemMessage(Component.translatable("command.settlements.town.test_building.empty"));
+            return 0;
         }
-
-        context.getSource().sendSystemMessage(Component.translatable("command.settlements.town.build.success"));
+        for (var arg : placingArgs) {
+            context.getSource().sendSystemMessage(Component.literal(arg.toString()));
+        }
         return 0;
     }
 }

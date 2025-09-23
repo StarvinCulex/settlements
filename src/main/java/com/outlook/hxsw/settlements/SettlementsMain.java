@@ -3,10 +3,8 @@ package com.outlook.hxsw.settlements;
 import com.mojang.logging.LogUtils;
 import com.outlook.hxsw.settlements.building.RegisteredBuildings;
 import com.outlook.hxsw.settlements.command.CommandSettlements;
-import com.outlook.hxsw.settlements.engine.buildings.BuildingType;
 import com.outlook.hxsw.settlements.engine.data.*;
-import com.outlook.hxsw.settlements.folk.*;
-import net.minecraft.server.level.ChunkMap;
+import com.outlook.hxsw.settlements.entities.FolkEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -39,7 +37,7 @@ public class SettlementsMain {
 
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        ResidentEntity.ENTITY_TYPES.register(modEventBus);
+        FolkEntity.ENTITY_TYPES.register(modEventBus);
 
         CommandSettlements.getCommands().forEach(NeoForge.EVENT_BUS::register);
         NeoForge.EVENT_BUS.register(this);

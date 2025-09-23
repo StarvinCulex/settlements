@@ -22,7 +22,7 @@ public abstract class WithParent<P extends SidecarData> implements SidecarData {
     }
 
     @Override
-    public final @Nullable Scheduler.Sidecar scheduler() {
+    public final @Nullable Scheduler.Data scheduler() {
         return parent == null ? null : parent.scheduler();
     }
 }

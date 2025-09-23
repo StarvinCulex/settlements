@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.building.utils.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -14,8 +14,10 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import java.util.function.Supplier;
 
 public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Type> {
-    private BuildingFarmField(Type variant, NearArgument<ConnectionArgument<BuildingLocation<GridCell>>> arg) {
-        super(variant, arg, variant.name);
+    static final Block PLANT_TEMPLATE = Blocks.WHEAT;
+
+    private BuildingFarmField(int id, Type variant, NearArgument<ConnectionArgument<BuildingLocation<GridCell>>> arg) {
+        super(id, variant, arg, variant.name);
     }
 
     private BuildingFarmField(FieldProperty properties) {
@@ -31,7 +33,7 @@ public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Typ
     protected PatternOption[] patternOptions() {
         return new PatternOption[]{
                 PatternOption.BlockReplacing.fill(
-                        getType().plant,
+                        PLANT_TEMPLATE,
                         getType().plant.defaultBlockState().setValue(getType().plantAgeProperty, getGrowStage())
                 )
         };
@@ -76,8 +78,8 @@ public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Typ
         }
 
         @Override
-        public BuildingFarmField make(NearArgument<ConnectionArgument<BuildingLocation<GridCell>>> args) {
-            return new BuildingFarmField(this, args);
+        public BuildingFarmField make(int id, NearArgument<ConnectionArgument<BuildingLocation<GridCell>>> args) {
+            return new BuildingFarmField(id, this, args);
         }
 
         @Override

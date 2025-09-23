@@ -2,7 +2,7 @@ package com.outlook.hxsw.settlements.engine.buildings;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 

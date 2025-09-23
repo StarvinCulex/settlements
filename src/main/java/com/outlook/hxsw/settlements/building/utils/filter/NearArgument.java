@@ -1,6 +1,6 @@
 package com.outlook.hxsw.settlements.building.utils.filter;
 
-import com.outlook.hxsw.settlements.engine.buildings.Buildable;
+import com.outlook.hxsw.settlements.engine.buildings.Building;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingArgument;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
 
@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public record NearArgument<L extends BuildingArgument>(
-        Collection<Buildable> neighbors,
+        Collection<Building> neighbors,
         L inner
 ) implements BuildingArgument {
     @Override

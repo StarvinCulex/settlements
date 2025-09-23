@@ -1,7 +1,7 @@
 package com.outlook.hxsw.settlements.building.utils;
 
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;

@@ -3,8 +3,8 @@ package com.outlook.hxsw.settlements.engine.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingSet;
-import com.outlook.hxsw.settlements.engine.data.utils.WithParent;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
@@ -12,9 +12,8 @@ import net.minecraft.world.level.Level;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class Town extends WithParent<SettlementsData> {
+public class Town extends WithParentAndID<TownSet> {
     private final GridRegion border;
-    private final int id;
     private String name;
     private final BuildingSet buildingSet;
     private final ResourceKey<Level> dimension;
@@ -26,7 +25,7 @@ public class Town extends WithParent<SettlementsData> {
             BuildingSet buildings,
             ResourceKey<Level> dimension
     ) {
-        this.id = id;
+        super(id);
         this.name = name;
         this.border = border;
         this.buildingSet = buildings;
@@ -37,10 +36,6 @@ public class Town extends WithParent<SettlementsData> {
 
     public Town(int id, String name, Vec3i center, ResourceKey<Level> dimension) {
         this(id, name, generateBorder(center), new BuildingSet(), dimension);
-    }
-
-    public int getID() {
-        return id;
     }
 
     public String getName()  {
@@ -65,7 +60,12 @@ public class Town extends WithParent<SettlementsData> {
 
     public Function<SettlementsData, Town> getReference() {
         int id = this.id;
-        return (SettlementsData data) -> data.getTown(id);
+        return (SettlementsData data) -> data.towns.get(id).orElseThrow();
+    }
+
+    @Override
+    public String toString() {
+        return name + "#" + id;
     }
 
     private static final int RADIUS = 10;
@@ -84,8 +84,8 @@ public class Town extends WithParent<SettlementsData> {
     );
 
     @Override
-    public void registerToSidecar(Scheduler.Sidecar sidecar) {
-        this.buildingSet.registerToSidecar(sidecar);
+    public void registerToSidecar(Scheduler.Data scheduler) {
+        this.buildingSet.registerToSidecar(scheduler);
     }
 
 

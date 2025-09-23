@@ -1,4 +1,4 @@
-package com.outlook.hxsw.settlements.goods;
+package com.outlook.hxsw.settlements.engine.goods;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;

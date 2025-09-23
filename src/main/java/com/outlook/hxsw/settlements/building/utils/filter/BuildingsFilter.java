@@ -1,10 +1,10 @@
 package com.outlook.hxsw.settlements.building.utils.filter;
 
-import com.outlook.hxsw.settlements.engine.buildings.Buildable;
+import com.outlook.hxsw.settlements.engine.buildings.Building;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingArgument;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingSet;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 
 import java.util.*;
 import java.util.function.*;
@@ -74,11 +74,11 @@ public class BuildingsFilter {
     Function<L, ConnectionArgument<L>> connectTo(GridSide subjectFacing, BiPredicate<L, Connection> filter) {
         return source -> {
             Grids sourceAt = source.location().grids();
-            Map<Buildable, Connection> pointings = new HashMap<>();
+            Map<Building, Connection> pointings = new HashMap<>();
             for (GridSide facing : GridSide.values()) {
                 Grids nextTo = sourceAt.nextTo(facing);
                 for (Grid pointingGrid : nextTo) {
-                    Buildable pointedBuilding = buildingSet.getGridMap().get(pointingGrid);
+                    Building pointedBuilding = buildingSet.getGridMap().get(pointingGrid);
                     if (pointedBuilding == null || pointings.containsKey(pointedBuilding)) {
                         continue;
                     }
@@ -103,7 +103,7 @@ public class BuildingsFilter {
     }
 
     public <L extends BuildingArgument>
-    Function<L, NearArgument<L>> near(int gridDistance, Predicate<Buildable> filter) {
+    Function<L, NearArgument<L>> near(int gridDistance, Predicate<Building> filter) {
         return source -> {
             Grids region = new GridRegion(source.location().grids().center(), gridDistance);
             var neighbors = region.stream()

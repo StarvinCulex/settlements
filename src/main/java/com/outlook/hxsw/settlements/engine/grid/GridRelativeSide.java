@@ -1,7 +1,6 @@
-package com.outlook.hxsw.settlements.utils.grid;
+package com.outlook.hxsw.settlements.engine.grid;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Direction;
 
 public enum GridRelativeSide {
     FRONT,

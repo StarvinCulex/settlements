@@ -1,7 +1,7 @@
 package com.outlook.hxsw.settlements.building.utils;
 
-import com.outlook.hxsw.settlements.utils.grid.GridSide;
-import com.outlook.hxsw.settlements.utils.grid.GridSize;
+import com.outlook.hxsw.settlements.engine.grid.GridSide;
+import com.outlook.hxsw.settlements.engine.grid.GridSize;
 import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;

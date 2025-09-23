@@ -1,159 +1,92 @@
 package com.outlook.hxsw.settlements.engine.buildings;
 
+
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.outlook.hxsw.settlements.engine.data.utils.WithParent;
-import com.outlook.hxsw.settlements.utils.grid.*;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
-import com.outlook.hxsw.settlements.engine.schedule.ServerTask;
-import com.outlook.hxsw.settlements.engine.schedule.tools.ServerTrigger;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
+import com.outlook.hxsw.settlements.engine.grid.Grids;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.StreamSupport;
-
-
-public abstract class Building<G extends Grids, P extends Enum<P>>
-        extends WithParent<BuildingSet> implements Buildable
-{
-    private final BasicProperties<G> properties;
-    private P buildingPattern;
-
-    protected Building(P pattern, BuildingLocation<G> location, String name) {
-        this(pattern.getDeclaringClass(), new BasicProperties<>(location, name, pattern.name()));
+public abstract class Building extends WithParentAndID<BuildingSet> {
+    public Building(int id) {
+        super(id);
     }
 
-    protected Building(Class<P> patternClass, BasicProperties<G> properties) {
-        this.properties = properties;
-        this.buildingPattern = P.valueOf(patternClass, properties.buildingPattern);
-    }
+    /**
+     * 建筑实例关联的BuildingType是可以动态改变的。
+     * @return 此建筑关联的BuildingType。返回类型的泛型参数必须是此建筑类型。
+     */
+    public abstract BuildingType<?> getType();
+    public abstract String getName();
+    public abstract void setName(String name);
 
-    protected abstract Consumer<Scheduler.Server> getBuilder();
+    public abstract BuildingLocation<?> getLocation();
 
-    public final void repair() {
-        var scheduler = scheduler();
-        if (scheduler == null) {
-            return;
-        }
-
-        if (properties.repairingTask.getAndSet(getBuilder()) == null) {
-            var trigger = new ServerTrigger.WhenChunkLoaded(getDimension(), StreamSupport.stream(getGrids().spliterator(), false).map(Grid::getChunk).distinct());
-            scheduler.register(new ServerTask(trigger, buildInServerSide(properties.repairingTask)));
-        }
-    }
-
-    private static Consumer<Scheduler.Server>
-    buildInServerSide(AtomicReference<Consumer<Scheduler.Server>> repairingTaskSlot) {
-        return s -> {
-            var task = repairingTaskSlot.getAndSet(null);
-            if (task != null) {
-                task.accept(s);
-            }
-        };
-    }
-
-    @Override
-    public final UUID getUUID() {
-        return properties.uuid;
-    }
-
-    @Override
     public final ResourceKey<Level> getDimension() {
         return getLocation().dimension();
     }
 
-    @Override
     public final int getGroundY() {
         return getLocation().groundY();
     }
 
-    @Override
     public final Grids getGrids() {
         return getLocation().grids();
     }
 
     @Override
-    public final BuildingLocation<G> getLocation() {
-        return properties.location;
-    }
-
-    public final P getBuildingPattern() {
-        return buildingPattern;
-    }
-
-    public final void setBuildingPattern(P buildingPattern) {
-        this.buildingPattern = buildingPattern;
-        this.properties.buildingPattern = buildingPattern.name();
-        repair();
-    }
-
-    protected BasicProperties<G> getProperties() {
-        return properties;
-    }
-
-    @Override
-    public final String getName() {
-        return properties.name;
-    }
-
-    @Override
-    public final void setName(String name) {
-        properties.name = name;
-    }
-
-    @Override
-    public void registerToSidecar(Scheduler.Sidecar scheduler) {
-        if (getProperties().needsRepairing) {
-            repair();
-        }
-    }
-
-    @Override
     public String toString() {
-        return String.format("%s<%s>", getType().getName(), getGrids().begin());
+        return getType().getName() + toShortString();
     }
 
-    public static class BasicProperties<G extends Grids> {
-        final UUID uuid;
-        final BuildingLocation<G> location;
-        String name;
-        String buildingPattern;
-        boolean needsRepairing;
-        final AtomicReference<Consumer<Scheduler.Server>> repairingTask = new AtomicReference<>();
-
-        public BasicProperties(UUID uuid, BuildingLocation<G> location, String name, String buildingPattern, boolean needsRepairing) {
-            this.uuid = uuid;
-            this.location = location;
-            this.name = name;
-            this.buildingPattern = buildingPattern;
-            this.needsRepairing = needsRepairing;
-        }
-
-        public BasicProperties(BuildingLocation<G> location, String name, String buildingPattern) {
-            this(UUID.randomUUID(), location, name, buildingPattern, true);
-        }
-
-        protected BasicProperties(BasicProperties<G> prop) {
-            this.uuid = prop.uuid;
-            this.location = prop.location;
-            this.name = prop.name;
-            this.buildingPattern = prop.buildingPattern;
-            this.needsRepairing = prop.needsRepairing;
-        }
-
-        public static <G extends Grids> Codec<BasicProperties<G>> codec(Codec<G> gCodec) {
-            return RecordCodecBuilder.create(instance ->
-                    instance.group(
-                            Codec.STRING.xmap(UUID::fromString, UUID::toString).fieldOf("uuid").forGetter(p -> p.uuid),
-                            BuildingLocation.codec(gCodec).fieldOf("location").forGetter(p -> p.location),
-                            Codec.STRING.fieldOf("name").forGetter(p -> p.name),
-                            Codec.STRING.fieldOf("variant").forGetter(p -> p.buildingPattern),
-                            Codec.BOOL.fieldOf("needsRepairing").forGetter(p -> p.needsRepairing || p.repairingTask.get() != null)
-                    ).apply(instance, BasicProperties::new)
-            );
-        }
+    public String toShortString() {
+        return String.format("#%d<%s>", id, getGrids().center());
     }
+
+    public static final Codec<Building> CODEC = new Codec<>() {
+        @Override
+        public <T> DataResult<Pair<Building, T>> decode(DynamicOps<T> ops, T input) {
+            // 1. 先解析 type 字段
+            DataResult<T> typeField = ops.get(input, "type");
+            return typeField.flatMap(typeVal -> {
+                DataResult<String> typeString = Codec.STRING.decode(ops, typeVal).map(Pair::getFirst);
+                return typeString.flatMap(typeName -> {
+                    BuildingType<?> type = BuildingType.getType(typeName);
+                    if (type == null) {
+                        // 明确指定类型，避免通配 capture 报错
+                        return DataResult.<Pair<Building, T>>error(() -> "Unknown buildable type: " + typeName);
+                    }
+                    // 由于 type.codec().decode 返回的是 Pair<? extends Buildable, T>
+                    // 强转一下
+                    @SuppressWarnings("unchecked")
+                    DataResult<Pair<Building, T>> res = (DataResult<Pair<Building, T>>) (DataResult<?>) type.codec().decode(ops, input);
+                    return res;
+                });
+            });
+        }
+
+        @Override
+        public <T> DataResult<T> encode(Building input, DynamicOps<T> ops, T prefix) {
+            String typeName = input.getType().getName();
+            T typeValue = ops.createString(typeName);
+
+            @SuppressWarnings("unchecked")
+            Codec<Building> codec = (Codec<Building>) input.getType().codec();
+            DataResult<T> innerResult = codec.encode(input, ops, prefix);
+
+            return innerResult.flatMap(innerMap -> {
+                var builder = ops.mapBuilder();
+                builder.add("type", typeValue);
+                var mapRes = ops.getMap(innerMap);
+                if (mapRes.error().isPresent()) {
+                    return DataResult.error(() -> "Buildable innerCodec result not a map: type=" + typeName);
+                }
+                mapRes.result().get().entries().forEach(e -> builder.add(e.getFirst(), e.getSecond()));
+                return builder.build(prefix);
+            });
+        }
+    };
 }

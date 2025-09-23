@@ -3,8 +3,8 @@ package com.outlook.hxsw.settlements.engine.buildings;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.data.*;
-import com.outlook.hxsw.settlements.engine.data.utils.WithParent;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.data.utils.ChildContainer;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.data.Town;
 import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 import com.outlook.hxsw.settlements.engine.schedule.ServerTask;
@@ -16,19 +16,19 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-public final class BuildingSet extends WithParent<Town> {
+public final class BuildingSet extends ChildContainer<Building, Town> {
+    final Map<Grid, Building> gridMap;
     Map<Grid, GridTerrain> terrainMap;
-    final Map<Grid, Buildable> gridMap;
-    final Map<UUID, Buildable> buildings;
 
     public BuildingSet() {
-        this.terrainMap = new HashMap<>();
         this.gridMap = new HashMap<>();
-        this.buildings = new HashMap<>();
+        this.terrainMap = new HashMap<>();
     }
 
-    public BuildingSet(Map<Grid, GridTerrain> terrainMap, List<? extends Buildable> buildings) {
-        this();
+    public BuildingSet(int nextBuildingID, List<Building> buildings, Map<Grid, GridTerrain> terrainMap) {
+        super(nextBuildingID);
+        this.gridMap = new HashMap<>();
+        this.terrainMap = terrainMap;
         addAll(buildings);
     }
 
@@ -36,68 +36,54 @@ public final class BuildingSet extends WithParent<Town> {
         return Collections.unmodifiableMap(terrainMap);
     }
 
-    public Map<Grid, Buildable> getGridMap() {
+    public Map<Grid, Building> getGridMap() {
         return Collections.unmodifiableMap(gridMap);
     }
 
-    public Collection<Buildable> getBuildings() {
-        return Collections.unmodifiableCollection(buildings.values());
-    }
-
-    public <B extends Buildable, G extends Grids, X extends BuildingArgument>
+    public <B extends Building, G extends Grids, X extends BuildingArgument>
     Optional<B> makeAndPlace(BuildingFactory<B, G, X> factory, Grid placingAt) {
         return factory.filter(this, Stream.of(placingAt))
                 .findFirst()
                 .map(x -> {
-                    B b = factory.make(x);
+                    B b = factory.make(generateChildID(), x);
                     add(b);
-
                     return b;
                 });
     }
 
-    public Optional<Buildable> get(UUID uuid) {
-        return Optional.ofNullable(buildings.get(uuid));
-    }
-
     @Override
-    public void registerToSidecar(Scheduler.Sidecar sidecar) {
-        System.out.println("BuildingSet of " + getParent() + " is empty. Make a TerrainSurveyor to survey.");
-        scheduler().run(new ServerTask(x -> true, new TerrainSurveyor(this.getParent())));
-        buildings.values().forEach(b -> b.registerToSidecar(sidecar));
+    public void registerToSidecar(Scheduler.Data scheduler) {
+        super.registerToSidecar(scheduler);
+        if (terrainMap.isEmpty()) {
+            System.out.println("BuildingSet of " + getParent() + " is empty. Make a TerrainSurveyor to survey.");
+            scheduler().run(new ServerTask(x -> true, new TerrainSurveyor(this.getParent())));
+        }
     }
 
     public static final Codec<BuildingSet> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
+                    Codec.INT.fieldOf("nextBuildingID").forGetter(BuildingSet::getNextChildID),
+                    Codec.list(Building.CODEC).fieldOf("buildings")
+                            .forGetter(BuildingSet::getChildrenList),
                     Codec.unboundedMap(Grid.CODEC, GridTerrain.CODEC).fieldOf("terrainMap")
-                            .forGetter(BuildingSet::getTerrainMap),
-                    Codec.list(Buildable.CODEC).fieldOf("buildings")
-                            .forGetter(bs -> bs.buildings.values().stream().toList())
+                            .forGetter(BuildingSet::getTerrainMap)
             ).apply(instance, BuildingSet::new)
     );
 
-    void add(Buildable building) throws GridOccupiedException {
-        if (buildings.putIfAbsent(building.getUUID(), building) != null) {
-            return;
-        }
-
+    @Override
+    protected void add(Building building) throws GridOccupiedException {
         Grids grids = building.getGrids();
         for (Grid g : grids) {
             if (gridMap.containsKey(g)) {
                 throw new GridOccupiedException(g, building, gridMap.get(g));
             }
         }
+
+        super.add(building);
+
         for (Grid g : grids) {
             gridMap.put(g, building);
         }
-
-        if (building instanceof Building<?, ?> b) {
-            b.setParent(this);
-        }
-    }
-
-    void addAll(Collection<? extends Buildable> buildings) throws GridOccupiedException {
-        buildings.forEach(this::add);
     }
 
     void setTerrainMap(Map<Grid, GridTerrain> terrainMap) {
@@ -133,7 +119,7 @@ class TerrainSurveyor implements Consumer<Scheduler.Server> {
         scheduler.run(this::callback);
     }
 
-    private void callback(Scheduler.Sidecar sidecar) {
-        consumer.apply(sidecar.data()).accept(destTerrainMap);
+    private void callback(Scheduler.Data scheduler) {
+        consumer.apply(scheduler.data()).accept(destTerrainMap);
     }
 }

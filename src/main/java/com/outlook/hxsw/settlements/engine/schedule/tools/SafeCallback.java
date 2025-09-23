@@ -8,14 +8,14 @@ import java.util.function.Function;
 
 public class SafeCallback<T> implements Consumer<Scheduler.Server> {
     private final T callbackResource;
-    private final Function<Scheduler.Server, BiConsumer<Scheduler.Sidecar, T>> task;
+    private final Function<Scheduler.Server, BiConsumer<Scheduler.Data, T>> task;
 
-    public SafeCallback(T resource, Function<Scheduler.Server, BiConsumer<Scheduler.Sidecar, T>> task) {
+    public SafeCallback(T resource, Function<Scheduler.Server, BiConsumer<Scheduler.Data, T>> task) {
         this.callbackResource = resource;
         this.task = task;
     }
 
-    public SafeCallback(T resource, Consumer<Scheduler.Server> task, BiConsumer<Scheduler.Sidecar, T> callback) {
+    public SafeCallback(T resource, Consumer<Scheduler.Server> task, BiConsumer<Scheduler.Data, T> callback) {
         this(resource, s -> {
             task.accept(s);
             return callback;

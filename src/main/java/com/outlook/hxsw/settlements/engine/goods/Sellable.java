@@ -1,4 +1,4 @@
-package com.outlook.hxsw.settlements.goods;
+package com.outlook.hxsw.settlements.engine.goods;
 
 import com.mojang.serialization.Codec;
 

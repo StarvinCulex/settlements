@@ -2,15 +2,15 @@ package com.outlook.hxsw.settlements.building.utils.filter;
 
 
 import com.outlook.hxsw.settlements.building.utils.BasicBuilding;
-import com.outlook.hxsw.settlements.engine.buildings.Buildable;
-import com.outlook.hxsw.settlements.utils.grid.GridRelativeSide;
-import com.outlook.hxsw.settlements.utils.grid.GridSide;
+import com.outlook.hxsw.settlements.engine.buildings.Building;
+import com.outlook.hxsw.settlements.engine.grid.GridRelativeSide;
+import com.outlook.hxsw.settlements.engine.grid.GridSide;
 
 public record Connection(
         GridRelativeSide relativeSide,
         GridSide direction,
         int alignment,
-        Buildable building
+        Building building
 ) {
     public GridRelativeSide pointedSide() {
         if (building instanceof BasicBuilding<?> b) {

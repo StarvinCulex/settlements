@@ -2,10 +2,9 @@ package com.outlook.hxsw.settlements.building.utils;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.outlook.hxsw.settlements.SettlementsMain;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 
 import java.util.Collection;
@@ -14,13 +13,13 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.*;
 
-public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<ConnectiveBuildingPattern>> extends Building<GridCell, P> {
+public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<ConnectiveBuildingPattern>> extends PatternableBuilding<GridCell, P> {
     private final int hCenter;
 
-    protected ConnectiveBuilding(P variant, ConnectionArgument<BuildingLocation<GridCell>> arg, String name) {
+    protected ConnectiveBuilding(int id, P variant, ConnectionArgument<BuildingLocation<GridCell>> arg, String name) {
         this(
                 variant.getDeclaringClass(),
-                new ConnectiveProperties(arg.inner(), name, variant.name())
+                new ConnectiveProperties(id, arg.inner(), name, variant.name())
         );
         connectAll(arg.connections());
     }
@@ -41,7 +40,7 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
         repair();
     }
 
-    protected final void connect(GridSide side, Buildable building) {
+    protected final void connect(GridSide side, Building building) {
         connectWithoutRepair(side, building);
         repair();
     }
@@ -70,7 +69,7 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
         return getBuildingPattern().get().generateBuilder(getLocation(), getConnections(), patternOptions());
     }
 
-    private void connectWithoutRepair(GridSide side, Buildable building) {
+    private void connectWithoutRepair(GridSide side, Building building) {
         int deltaHeight = building.getGroundY() - this.getGroundY();
         if (!(building instanceof ConnectiveBuilding<?> other)) {
             connect(side, deltaHeight);
@@ -105,7 +104,7 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
             return (at, pointTo) -> canConnectTo(at.groundY(), pointTo.building()) && filter.test(pointTo);
         }
 
-        default boolean canConnectTo(int groundY, Buildable other) {
+        default boolean canConnectTo(int groundY, Building other) {
             int hMin = connectingHeightMin();
             int hMax = connectingHeightMax();
             if (other instanceof ConnectiveBuilding<?> c) {
@@ -134,11 +133,12 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
         }
 
         public ConnectiveProperties(
+                int id,
                 BuildingLocation<GridCell> location,
                 String name,
                 String buildingPattern
         ) {
-            super(location, name, buildingPattern);
+            super(id, location, name, buildingPattern);
             this.connections = new EnumMap<>(GridSide.class);
         }
 

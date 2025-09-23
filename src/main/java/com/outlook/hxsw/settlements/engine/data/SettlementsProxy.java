@@ -74,7 +74,7 @@ public class SettlementsProxy extends ScheduleController {
         return new SettlementsProxy(savePath, data, phase);
     }
 
-    private Consumer<Scheduler.Sidecar> getSavingTask() {
+    private Consumer<Scheduler.Data> getSavingTask() {
         Path savePath = this.savePath;
         return sidecar -> SettlementsProxy.saveData(sidecar.data(), sidecar.getPhase(), savePath);
     }

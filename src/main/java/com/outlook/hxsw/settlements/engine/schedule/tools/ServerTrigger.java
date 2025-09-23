@@ -8,6 +8,9 @@ import net.minecraft.world.level.Level;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * 一个提供了多种ServerTask中定义的trigger的工具类。
+ */
 public final class ServerTrigger {
     private ServerTrigger() {}
 

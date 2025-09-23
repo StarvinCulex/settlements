@@ -8,14 +8,14 @@ import com.outlook.hxsw.settlements.building.utils.filter.ConnectionArgument;
 import com.outlook.hxsw.settlements.building.utils.ConnectiveBuilding;
 import com.outlook.hxsw.settlements.building.utils.ConnectiveBuildingPattern;
 import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.utils.grid.*;
+import com.outlook.hxsw.settlements.engine.grid.*;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class BuildingRoad extends ConnectiveBuilding<BuildingRoad.Type> implements Path {
-    private BuildingRoad(ConnectionArgument<BuildingLocation<GridCell>> arg) {
-        super(Type.DIRT, arg, "road");
+    private BuildingRoad(int id, ConnectionArgument<BuildingLocation<GridCell>> arg) {
+        super(id, Type.DIRT, arg, "road");
     }
 
     private BuildingRoad(ConnectiveProperties properties)  {
@@ -90,8 +90,8 @@ public final class BuildingRoad extends ConnectiveBuilding<BuildingRoad.Type> im
         }
 
         @Override
-        public BuildingRoad make(ConnectionArgument<BuildingLocation<GridCell>> arg) {
-            return new BuildingRoad(arg);
+        public BuildingRoad make(int id, ConnectionArgument<BuildingLocation<GridCell>> arg) {
+            return new BuildingRoad(id, arg);
         }
 
         @Override
