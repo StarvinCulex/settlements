@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.data.SettlementsData;
 import com.outlook.hxsw.settlements.engine.data.utils.ChildContainer;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public final class FolkSet extends ChildContainer<Folk, SettlementsData> {
     }
 
     @Override
-    public void registerToSidecar(Scheduler.Data scheduler) {
+    public void registerToDataScheduler(DataScheduler scheduler) {
 
     }
 

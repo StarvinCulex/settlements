@@ -2,6 +2,7 @@ package com.outlook.hxsw.settlements.engine.data;
 
 import com.outlook.hxsw.settlements.SettlementsMain;
 import com.outlook.hxsw.settlements.engine.schedule.*;
+import com.outlook.hxsw.settlements.engine.schedule.impl.ScheduleController;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -11,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.function.Consumer;
 
 public class SettlementsProxy extends ScheduleController {
     public static SettlementsProxy get(MinecraftServer server) {
@@ -19,13 +19,13 @@ public class SettlementsProxy extends ScheduleController {
     }
 
     public void save() {
-        run(getSavingTask());
+        dataSchedule(getSavingTask());
     }
 
     public void stopAndSave() {
         stopSidecar();
         try (var dataAccessor = getData()) {
-            saveData(dataAccessor.get(), getPhase(), savePath);
+            saveData(dataAccessor.get(), dataAccessor.phase(), savePath);
         }
     }
 
@@ -39,7 +39,7 @@ public class SettlementsProxy extends ScheduleController {
 
     private SettlementsProxy(Path savePath, SettlementsData data, int phase) {
         super(data, phase);
-        data.registerToSidecar(getSidecar());
+        data.registerToDataScheduler(getSidecar());
         this.savePath = savePath;
     }
 
@@ -74,12 +74,12 @@ public class SettlementsProxy extends ScheduleController {
         return new SettlementsProxy(savePath, data, phase);
     }
 
-    private Consumer<Scheduler.Data> getSavingTask() {
+    private Task<DataScheduler, Void> getSavingTask() {
         Path savePath = this.savePath;
         return sidecar -> SettlementsProxy.saveData(sidecar.data(), sidecar.getPhase(), savePath);
     }
 
-    private static void saveData(SettlementsData data, int phase, Path savePath) {
+    private static Void saveData(SettlementsData data, int phase, Path savePath) {
         CompoundTag tag = new CompoundTag();
         var savedData = SettlementsData.CODEC.encodeStart(NbtOps.INSTANCE, data).getOrThrow();
         tag.put(NBT_DATA_KEY, savedData);
@@ -90,5 +90,6 @@ public class SettlementsProxy extends ScheduleController {
             SettlementsMain.LOGGER.error("Error reading settlements data", e);
             throw new IllegalStateException("Error reading settlements data");
         }
+        return null;
     }
 }

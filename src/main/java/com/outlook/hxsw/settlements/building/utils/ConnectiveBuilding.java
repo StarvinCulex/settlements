@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.grid.*;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +65,7 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
     }
 
     @Override
-    public Consumer<Scheduler.Server> getBuilder() {
+    public Consumer<ServerScheduler> getBuilder() {
         return getBuildingPattern().get().generateBuilder(getLocation(), getConnections(), patternOptions());
     }
 

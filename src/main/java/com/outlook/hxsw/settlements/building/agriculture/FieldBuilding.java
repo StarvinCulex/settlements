@@ -5,9 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.utils.*;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
-import com.outlook.hxsw.settlements.engine.schedule.SidecarTimer;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import com.outlook.hxsw.settlements.engine.grid.*;
+import com.outlook.hxsw.settlements.engine.schedule.ScheduledTask;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuildingPattern>> extends ConnectiveBuilding<P> {
-    private @Nullable SidecarTimer timer = null;
+    private @Nullable ScheduledTask<Void, ?> timer = null;
 
     protected FieldBuilding(
             int id,
@@ -58,25 +58,25 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     }
 
     @Override
-    public void registerToSidecar(Scheduler.Data scheduler) {
-        super.registerToSidecar(scheduler);
+    public void registerToDataScheduler(DataScheduler scheduler) {
+        super.registerToDataScheduler(scheduler);
         if (timer == null) {
             if (getProperties().timerPhase == null) {
                 getProperties().timerPhase = scheduler.getPhase();
             }
-            timer = new SidecarTimer(getProperties().timerPhase, getType().growTickCost(), this::tick);
+            timer = scheduler.runPeriodically(getProperties().timerPhase, getType().growTickCost(), this::tick);
         }
-        scheduler.register(timer);
     }
 
-    private void tick(Scheduler.Data scheduler) {
+    private Void tick(DataScheduler scheduler) {
         if (getProperties().growStage >= getType().growMaxStage()) {
-            return;
+            return null;
         }
         if (++getProperties().growStage == getType().growMaxStage()) {
             getHarvester().ifPresent(Harvester::harvest);
         }
         repair();
+        return null;
     }
 
     public interface Type<B extends FieldBuilding<?>> extends ConnectiveBuilding.Type<B>,
@@ -128,7 +128,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
         ) {
             super(id, location, name, buildingPattern);
             this.timerPhase = null;
-            this.growStage = -1;
+            this.growStage = 0;
             this.harvesterID = harvesterID;
         }
 

@@ -1,13 +1,14 @@
 package com.outlook.hxsw.settlements.engine.data.utils;
 
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
-
-import javax.annotation.Nullable;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
 public abstract class WithParent<P extends SidecarData> implements SidecarData {
-    private @Nullable P parent = null;
+    private P parent = null;
 
-    public final @Nullable P getParent() {
+    /**
+     * 可能是null。
+     */
+    public final P getParent() {
         return parent;
     }
 
@@ -17,12 +18,15 @@ public abstract class WithParent<P extends SidecarData> implements SidecarData {
         }
         this.parent = parent;
         if (scheduler() != null) {
-            this.registerToSidecar(scheduler());
+            this.registerToDataScheduler(scheduler());
         }
     }
 
+    /**
+     * 可能是null
+     */
     @Override
-    public final @Nullable Scheduler.Data scheduler() {
+    public final DataScheduler scheduler() {
         return parent == null ? null : parent.scheduler();
     }
 }

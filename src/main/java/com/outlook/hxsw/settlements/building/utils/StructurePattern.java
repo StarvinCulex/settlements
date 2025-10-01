@@ -2,7 +2,7 @@ package com.outlook.hxsw.settlements.building.utils;
 
 import com.outlook.hxsw.settlements.engine.grid.GridSide;
 import com.outlook.hxsw.settlements.engine.grid.GridSize;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
@@ -38,7 +38,7 @@ public class StructurePattern {
         this.zLen = zLen;
     }
 
-    public Consumer<Scheduler.Server> build(
+    public Consumer<ServerScheduler> build(
             ResourceKey<Level> dimension,
             BlockPos northwestCorner,
             Rotation rotation,
@@ -80,7 +80,7 @@ public class StructurePattern {
     }
 
     static final int UPDATE_FLAG = Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
-    private class Builder implements Consumer<Scheduler.Server> {
+    private class Builder implements Consumer<ServerScheduler> {
         public Builder(
                 ResourceKey<Level> dimension,
                 BlockPos northwestCorner,
@@ -99,7 +99,7 @@ public class StructurePattern {
         private final PatternOption[] options;
 
         @Override
-        public void accept(Scheduler.Server scheduler) {
+        public void accept(ServerScheduler scheduler) {
             build(scheduler.server());
         }
 

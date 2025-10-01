@@ -3,7 +3,7 @@ package com.outlook.hxsw.settlements.engine.folks;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
 public final class Folk extends WithParentAndID<FolkSet> {
     public Folk(int id) {
@@ -11,7 +11,7 @@ public final class Folk extends WithParentAndID<FolkSet> {
     }
 
     @Override
-    public void registerToSidecar(Scheduler.Data scheduler) {
+    public void registerToDataScheduler(DataScheduler scheduler) {
 
     }
 

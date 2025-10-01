@@ -16,6 +16,11 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.stream.Collectors;
 
+/**
+ * 这个命令用于放置建筑。
+ * 这个命令有一个bug。不好修复。放置的建筑如果在当前tick注册了定时任务，那么它在当前dataPhase还会执行。
+ * 这是因为定时任务在当前dataPhase不执行的机理其实是：执行当前phase定时任务时添加的定时任务不会在遍历列表中，而其他插入的任务会在定时任务执行之后。
+ */
 public class CommandSettlementsTownAddBuilding extends CommandSettlementsTown {
     private static final String BUILDING_TYPE = "building_type";
     private static final String POSITION = "position";

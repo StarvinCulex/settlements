@@ -6,8 +6,9 @@ import com.outlook.hxsw.settlements.engine.data.*;
 import com.outlook.hxsw.settlements.engine.data.utils.ChildContainer;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.data.Town;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
-import com.outlook.hxsw.settlements.engine.schedule.ServerTask;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.Task;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -52,11 +53,11 @@ public final class BuildingSet extends ChildContainer<Building, Town> {
     }
 
     @Override
-    public void registerToSidecar(Scheduler.Data scheduler) {
-        super.registerToSidecar(scheduler);
+    public void registerToDataScheduler(DataScheduler scheduler) {
+        super.registerToDataScheduler(scheduler);
         if (terrainMap.isEmpty()) {
             System.out.println("BuildingSet of " + getParent() + " is empty. Make a TerrainSurveyor to survey.");
-            scheduler().run(new ServerTask(x -> true, new TerrainSurveyor(this.getParent())));
+            scheduler.schedule(new TerrainSurveyor(this.getParent()));
         }
     }
 
@@ -91,7 +92,7 @@ public final class BuildingSet extends ChildContainer<Building, Town> {
     }
 }
 
-class TerrainSurveyor implements Consumer<Scheduler.Server> {
+class TerrainSurveyor implements Task<ServerScheduler, Void> {
     private final Function<SettlementsData, Consumer<Map<Grid, GridTerrain>>> consumer;
     private final Grids grids;
     private final ResourceKey<Level> dimension;
@@ -104,7 +105,7 @@ class TerrainSurveyor implements Consumer<Scheduler.Server> {
     }
 
     @Override
-    public void accept(Scheduler.Server scheduler) throws RuntimeException {
+    public Void run(ServerScheduler scheduler) throws RuntimeException {
         ServerLevel level = scheduler.server().getLevel(dimension);
         if (level != null) {
             for (Grid g : grids) {
@@ -116,10 +117,12 @@ class TerrainSurveyor implements Consumer<Scheduler.Server> {
         } else {
             System.out.println("[settlements] cannot survey because level is null");
         }
-        scheduler.run(this::callback);
+        scheduler.schedule(this::callback);
+        return null;
     }
 
-    private void callback(Scheduler.Data scheduler) {
+    private Void callback(DataScheduler scheduler) {
         consumer.apply(scheduler.data()).accept(destTerrainMap);
+        return null;
     }
 }

@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingSet;
 import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
 import com.outlook.hxsw.settlements.engine.grid.*;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -84,8 +84,8 @@ public class Town extends WithParentAndID<TownSet> {
     );
 
     @Override
-    public void registerToSidecar(Scheduler.Data scheduler) {
-        this.buildingSet.registerToSidecar(scheduler);
+    public void registerToDataScheduler(DataScheduler scheduler) {
+        this.buildingSet.registerToDataScheduler(scheduler);
     }
 
 

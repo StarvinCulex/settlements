@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.utils.filter.FacingArgument;
 import com.outlook.hxsw.settlements.engine.buildings.*;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
 import com.outlook.hxsw.settlements.engine.grid.*;
+import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
 import net.minecraft.core.BlockPos;
 
 import java.util.function.Consumer;
@@ -30,7 +30,7 @@ public abstract class BasicBuilding<P extends Enum<P> & Supplier<StructurePatter
     }
 
     @Override
-    public Consumer<Scheduler.Server> getBuilder() {
+    public Consumer<ServerScheduler> getBuilder() {
         return getBuildingPattern().get().build(
                 getDimension(),
                 new BlockPos(getGrids().begin().getFromX(), getGroundY(), getGrids().begin().getFromZ()),

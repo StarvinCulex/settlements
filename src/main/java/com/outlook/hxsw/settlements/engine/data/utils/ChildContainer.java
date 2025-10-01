@@ -1,9 +1,10 @@
 package com.outlook.hxsw.settlements.engine.data.utils;
 
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
 import java.util.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ChildContainer<C extends WithParentAndID, P extends SidecarData> extends WithParent<P> {
     private int nextChildID = 1;
     private final Map<Integer, C> children = new HashMap<>();
@@ -46,7 +47,7 @@ public class ChildContainer<C extends WithParentAndID, P extends SidecarData> ex
     }
 
     @Override
-    public void registerToSidecar(Scheduler.Data scheduler) {
-        children.values().forEach(c -> c.registerToSidecar(scheduler));
+    public void registerToDataScheduler(DataScheduler scheduler) {
+        children.values().forEach(c -> c.registerToDataScheduler(scheduler));
     }
 }

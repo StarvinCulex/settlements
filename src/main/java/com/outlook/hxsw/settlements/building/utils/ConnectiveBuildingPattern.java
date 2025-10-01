@@ -2,7 +2,7 @@ package com.outlook.hxsw.settlements.building.utils;
 
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
 import com.outlook.hxsw.settlements.engine.grid.*;
-import com.outlook.hxsw.settlements.engine.schedule.Scheduler;
+import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -28,7 +28,7 @@ public class ConnectiveBuildingPattern {
         this.cornerSize = cornerSize;
     }
 
-    Consumer<Scheduler.Server> generateBuilder(
+    Consumer<ServerScheduler> generateBuilder(
             BuildingLocation<GridCell> location,
             Map<GridSide, Integer> connections,
             PatternOption... options
@@ -45,7 +45,7 @@ public class ConnectiveBuildingPattern {
         ).reduce(makeMain(location.dimension(), originPos, options), Consumer::andThen);
     }
 
-    private Consumer<Scheduler.Server> makeSides(
+    private Consumer<ServerScheduler> makeSides(
             Map<GridSide, Integer> connections,
             ResourceKey<Level> dimension,
             BlockPos originPos,
@@ -68,7 +68,7 @@ public class ConnectiveBuildingPattern {
         ).build(dimension, originPos.offset(offset), StructurePattern.getRotation(side), options);
     }
 
-    private Consumer<Scheduler.Server> makeCorners(
+    private Consumer<ServerScheduler> makeCorners(
             Map<GridSide, Integer> connections,
             ResourceKey<Level> dimension,
             BlockPos originPos,
@@ -99,7 +99,7 @@ public class ConnectiveBuildingPattern {
             ).build(dimension, originPos.offset(offset), StructurePattern.getRotation(side), options);
     }
 
-    private Consumer<Scheduler.Server> makeMain(
+    private Consumer<ServerScheduler> makeMain(
             ResourceKey<Level> dimension,
             BlockPos originPos,
             PatternOption... options
