@@ -7,15 +7,13 @@ import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import com.outlook.hxsw.settlements.engine.grid.*;
-import com.outlook.hxsw.settlements.engine.schedule.ScheduledTask;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuildingPattern>> extends ConnectiveBuilding<P> {
-    private @Nullable ScheduledTask<Void, ?> timer = null;
+    private boolean timerIsSet = false;
 
     protected FieldBuilding(
             int id,
@@ -60,23 +58,23 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     @Override
     public void registerToDataScheduler(DataScheduler scheduler) {
         super.registerToDataScheduler(scheduler);
-        if (timer == null) {
+        if (timerIsSet) {
             if (getProperties().timerPhase == null) {
                 getProperties().timerPhase = scheduler.getPhase();
             }
-            timer = scheduler.runPeriodically(getProperties().timerPhase, getType().growTickCost(), this::tick);
+            timerIsSet = true;
+            scheduler.runPeriodically(getProperties().timerPhase, getType().growTickCost(), this::tick);
         }
     }
 
-    private Void tick(DataScheduler scheduler) {
+    private void tick(DataScheduler scheduler) {
         if (getProperties().growStage >= getType().growMaxStage()) {
-            return null;
+            return;
         }
         if (++getProperties().growStage == getType().growMaxStage()) {
             getHarvester().ifPresent(Harvester::harvest);
         }
         repair();
-        return null;
     }
 
     public interface Type<B extends FieldBuilding<?>> extends ConnectiveBuilding.Type<B>,

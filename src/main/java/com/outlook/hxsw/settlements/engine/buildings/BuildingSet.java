@@ -8,7 +8,7 @@ import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.data.Town;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
-import com.outlook.hxsw.settlements.engine.schedule.Task;
+import com.outlook.hxsw.settlements.engine.schedule.VoidTask;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -92,7 +92,7 @@ public final class BuildingSet extends ChildContainer<Building, Town> {
     }
 }
 
-class TerrainSurveyor implements Task<ServerScheduler, Void> {
+class TerrainSurveyor implements VoidTask<ServerScheduler> {
     private final Function<SettlementsData, Consumer<Map<Grid, GridTerrain>>> consumer;
     private final Grids grids;
     private final ResourceKey<Level> dimension;
@@ -105,7 +105,7 @@ class TerrainSurveyor implements Task<ServerScheduler, Void> {
     }
 
     @Override
-    public Void run(ServerScheduler scheduler) throws RuntimeException {
+    public void run(ServerScheduler scheduler) throws RuntimeException {
         ServerLevel level = scheduler.server().getLevel(dimension);
         if (level != null) {
             for (Grid g : grids) {
@@ -118,11 +118,9 @@ class TerrainSurveyor implements Task<ServerScheduler, Void> {
             System.out.println("[settlements] cannot survey because level is null");
         }
         scheduler.schedule(this::callback);
-        return null;
     }
 
-    private Void callback(DataScheduler scheduler) {
+    private void callback(DataScheduler scheduler) {
         consumer.apply(scheduler.data()).accept(destTerrainMap);
-        return null;
     }
 }

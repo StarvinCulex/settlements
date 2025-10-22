@@ -15,15 +15,19 @@ public interface ServerScheduler {
 
     Set<Trigger> triggers();
 
-    <R, T extends Task<DataScheduler, R>>
-    ScheduledTask<R, T> schedule(T task);
+    <R> ScheduledTask<DataScheduler, R> schedule(Task<DataScheduler, R> task);
 
-    <R, T extends Task<ServerScheduler, R>>
-    ScheduledTask<R, T> run(T task);
+    void schedule(VoidTask<DataScheduler> task);
 
-    <R, T extends Task<ServerScheduler, R>>
-    ScheduledTask<R, T> runIf(Condition condition, T task);
+    <R> ScheduledTask<ServerScheduler, R> run(Task<ServerScheduler, R> task);
 
-    <R, T extends Task<ServerScheduler, R>>
-    ScheduledTask<R, T> runWhen(Condition condition, T task);
+    void run(VoidTask<ServerScheduler> task);
+
+    <R> ScheduledTask<ServerScheduler, R> runIf(Condition condition, Task<ServerScheduler, R> task);
+
+    void runIf(Condition condition, VoidTask<ServerScheduler> task);
+
+    <R> ScheduledTask<ServerScheduler, R> runWhen(Condition condition, Task<ServerScheduler, R> task);
+
+    void runWhen(Condition condition, VoidTask<ServerScheduler> task);
 }

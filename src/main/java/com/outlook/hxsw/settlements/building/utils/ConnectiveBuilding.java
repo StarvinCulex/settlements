@@ -6,6 +6,7 @@ import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.Task;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +66,7 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
     }
 
     @Override
-    public Consumer<ServerScheduler> getBuilder() {
+    public Task<ServerScheduler, Void> getBuilder() {
         return getBuildingPattern().get().generateBuilder(getLocation(), getConnections(), patternOptions());
     }
 

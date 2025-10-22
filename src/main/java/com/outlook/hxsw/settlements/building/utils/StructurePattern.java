@@ -3,6 +3,7 @@ package com.outlook.hxsw.settlements.building.utils;
 import com.outlook.hxsw.settlements.engine.grid.GridSide;
 import com.outlook.hxsw.settlements.engine.grid.GridSize;
 import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.Task;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
@@ -18,7 +19,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class StructurePattern {
@@ -38,7 +38,7 @@ public class StructurePattern {
         this.zLen = zLen;
     }
 
-    public Consumer<ServerScheduler> build(
+    public Task<ServerScheduler, Void> build(
             ResourceKey<Level> dimension,
             BlockPos northwestCorner,
             Rotation rotation,
@@ -80,7 +80,7 @@ public class StructurePattern {
     }
 
     static final int UPDATE_FLAG = Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
-    private class Builder implements Consumer<ServerScheduler> {
+    private class Builder implements Task<ServerScheduler, Void> {
         public Builder(
                 ResourceKey<Level> dimension,
                 BlockPos northwestCorner,
@@ -99,8 +99,9 @@ public class StructurePattern {
         private final PatternOption[] options;
 
         @Override
-        public void accept(ServerScheduler scheduler) {
+        public Void run(ServerScheduler scheduler) {
             build(scheduler.server());
+            return null;
         }
 
         private void build(MinecraftServer server) {

@@ -6,9 +6,9 @@ import com.outlook.hxsw.settlements.building.utils.filter.FacingArgument;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.Task;
 import net.minecraft.core.BlockPos;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class BasicBuilding<P extends Enum<P> & Supplier<StructurePattern>> extends PatternableBuilding<GridRegion, P> {
@@ -30,7 +30,7 @@ public abstract class BasicBuilding<P extends Enum<P> & Supplier<StructurePatter
     }
 
     @Override
-    public Consumer<ServerScheduler> getBuilder() {
+    public Task<ServerScheduler, Void> getBuilder() {
         return getBuildingPattern().get().build(
                 getDimension(),
                 new BlockPos(getGrids().begin().getFromX(), getGroundY(), getGrids().begin().getFromZ()),

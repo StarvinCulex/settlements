@@ -16,27 +16,34 @@ public interface DataScheduler {
 
     int getPhase();
 
-    <R, T extends Task<DataScheduler, R>>
-    ScheduledTask<R, T> run(T task);
+    <R> ScheduledTask<DataScheduler, R> run(Task<DataScheduler, R> task);
 
-    <R, T extends Task<DataScheduler, R>>
-    ScheduledTask<R, T> runAfter(int delayPhases, T task);
+    void run(VoidTask<DataScheduler> task);
 
-    <R, T extends Task<DataScheduler, R>>
-    ScheduledTask<R, T> runWhen(Predicate<DataScheduler> condition, T task);
+    <R> ScheduledTask<DataScheduler, R> runAfter(int delayPhases, Task<DataScheduler, R> task);
+
+    void runAfter(int delayPhases, VoidTask<DataScheduler> task);
+
+    <R> ScheduledTask<DataScheduler, R> runWhen(Predicate<DataScheduler> condition, Task<DataScheduler, R> task);
+
+    void runWhen(Predicate<DataScheduler> condition, VoidTask<DataScheduler> task);
+
+    <R> ContinuousScheduledTask<DataScheduler, R> runPeriodically(int phase, int period, Task<DataScheduler, R> task);
 
     /**
      * 注册一个定时执行的任务。这个注册的任务在当前phase不会执行。
      */
-    <R, T extends Task<DataScheduler, R>>
-    ScheduledTask<R, T> runPeriodically(int phase, int period, T task);
+    void runPeriodically(int phase, int period, VoidTask<DataScheduler> task);
 
-    <R, T extends Task<ServerScheduler, R>>
-    ScheduledTask<R, T> schedule(T task);
+    <R> ScheduledTask<ServerScheduler, R> schedule(Task<ServerScheduler, R> task);
 
-    <R, T extends Task<ServerScheduler, R>>
-    ScheduledTask<R, T> scheduleIf(Condition condition, T task);
+    void schedule(VoidTask<ServerScheduler> task);
 
-    <R, T extends Task<ServerScheduler, R>>
-    ScheduledTask<R, T> scheduleWhen(Condition condition, T task);
+    <R> ScheduledTask<ServerScheduler, R> scheduleIf(Condition condition, Task<ServerScheduler, R> task);
+
+    void scheduleIf(Condition condition, VoidTask<ServerScheduler> task);
+
+    <R> ScheduledTask<ServerScheduler, R> scheduleWhen(Condition condition, Task<ServerScheduler, R> task);
+
+    void scheduleWhen(Condition condition, VoidTask<ServerScheduler> task);
 }

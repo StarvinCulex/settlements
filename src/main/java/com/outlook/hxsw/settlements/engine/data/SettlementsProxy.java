@@ -2,7 +2,6 @@ package com.outlook.hxsw.settlements.engine.data;
 
 import com.outlook.hxsw.settlements.SettlementsMain;
 import com.outlook.hxsw.settlements.engine.schedule.*;
-import com.outlook.hxsw.settlements.engine.schedule.impl.ScheduleController;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -23,7 +22,7 @@ public class SettlementsProxy extends ScheduleController {
     }
 
     public void stopAndSave() {
-        stopSidecar();
+        stopDataSide();
         try (var dataAccessor = getData()) {
             saveData(dataAccessor.get(), dataAccessor.phase(), savePath);
         }
@@ -39,7 +38,7 @@ public class SettlementsProxy extends ScheduleController {
 
     private SettlementsProxy(Path savePath, SettlementsData data, int phase) {
         super(data, phase);
-        data.registerToDataScheduler(getSidecar());
+        data.registerToDataScheduler(getDataSide());
         this.savePath = savePath;
     }
 

@@ -3,15 +3,16 @@ package com.outlook.hxsw.settlements.building.utils;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.Task;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class ConnectiveBuildingPattern {
     private final String dirPath;
@@ -28,7 +29,7 @@ public class ConnectiveBuildingPattern {
         this.cornerSize = cornerSize;
     }
 
-    Consumer<ServerScheduler> generateBuilder(
+    Task<ServerScheduler, Void> generateBuilder(
             BuildingLocation<GridCell> location,
             Map<GridSide, Integer> connections,
             PatternOption... options
@@ -39,13 +40,20 @@ public class ConnectiveBuildingPattern {
                 location.grids().at().getFromZ()
         );
 
-        return Arrays.stream(GridSide.values()).map(side ->
-                makeSides(connections, location.dimension(), originPos, side, options)
-                        .andThen(makeCorners(connections, location.dimension(), originPos, side, options))
-        ).reduce(makeMain(location.dimension(), originPos, options), Consumer::andThen);
+        List<Task<ServerScheduler, Void>> tasks = new ArrayList<>();
+        for (GridSide side : GridSide.values()) {
+            tasks.add(makeSides(connections, location.dimension(), originPos, side, options));
+            tasks.add(makeCorners(connections, location.dimension(), originPos, side, options));
+        }
+        tasks.add(makeMain(location.dimension(), originPos, options));
+
+        return scheduler -> {
+            tasks.forEach(t -> t.run(scheduler));
+            return null;
+        };
     }
 
-    private Consumer<ServerScheduler> makeSides(
+    private Task<ServerScheduler, Void> makeSides(
             Map<GridSide, Integer> connections,
             ResourceKey<Level> dimension,
             BlockPos originPos,
@@ -68,7 +76,7 @@ public class ConnectiveBuildingPattern {
         ).build(dimension, originPos.offset(offset), StructurePattern.getRotation(side), options);
     }
 
-    private Consumer<ServerScheduler> makeCorners(
+    private Task<ServerScheduler, Void> makeCorners(
             Map<GridSide, Integer> connections,
             ResourceKey<Level> dimension,
             BlockPos originPos,
@@ -99,7 +107,7 @@ public class ConnectiveBuildingPattern {
             ).build(dimension, originPos.offset(offset), StructurePattern.getRotation(side), options);
     }
 
-    private Consumer<ServerScheduler> makeMain(
+    private Task<ServerScheduler, Void> makeMain(
             ResourceKey<Level> dimension,
             BlockPos originPos,
             PatternOption... options

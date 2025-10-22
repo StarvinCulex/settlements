@@ -6,13 +6,12 @@ import com.outlook.hxsw.settlements.engine.buildings.Building;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingLocation;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
+import com.outlook.hxsw.settlements.engine.schedule.ScheduledTask;
 import com.outlook.hxsw.settlements.engine.schedule.ServerScheduler;
 import com.outlook.hxsw.settlements.engine.schedule.Task;
 import com.outlook.hxsw.settlements.engine.schedule.conditions.WhenChunkLoaded;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 
 public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> extends Building {
@@ -29,7 +28,7 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
         this.buildingPattern = P.valueOf(patternClass, properties.buildingPattern);
     }
 
-    protected abstract Consumer<ServerScheduler> getBuilder();
+    protected abstract Task<ServerScheduler, Void> getBuilder();
 
     public final void repair() {
         var scheduler = scheduler();
@@ -37,21 +36,11 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
             return;
         }
 
-        if (properties.repairingTask.getAndSet(getBuilder()) == null) {
-            var trigger = new WhenChunkLoaded(getDimension(), StreamSupport.stream(getGrids().spliterator(), false).map(Grid::getChunk).distinct());
-            scheduler.scheduleWhen(trigger, buildInServerSide(properties.repairingTask));
+        var builder = getBuilder();
+        if (properties.repairingTask == null || !properties.repairingTask.tryUpdate(builder)) {
+            var trigger = new WhenChunkLoaded(getDimension(), getGrids());
+            properties.repairingTask = scheduler.scheduleWhen(trigger, builder);
         }
-    }
-
-    private static Task<ServerScheduler, Void>
-    buildInServerSide(AtomicReference<Consumer<ServerScheduler>> repairingTaskSlot) {
-        return s -> {
-            var task = repairingTaskSlot.getAndSet(null);
-            if (task != null) {
-                task.accept(s);
-            }
-            return null;
-        };
     }
 
     @Override
@@ -96,7 +85,7 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
         String name;
         String buildingPattern;
         boolean needsRepairing;
-        final AtomicReference<Consumer<ServerScheduler>> repairingTask = new AtomicReference<>();
+        @Nullable ScheduledTask<ServerScheduler, Void> repairingTask;
 
         public BasicProperties(int id, BuildingLocation<G> location, String name, String buildingPattern, boolean needsRepairing) {
             this.id = id;
@@ -104,6 +93,7 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
             this.name = name;
             this.buildingPattern = buildingPattern;
             this.needsRepairing = needsRepairing;
+            this.repairingTask = null;
         }
 
         public BasicProperties(int id, BuildingLocation<G> location, String name, String buildingPattern) {
@@ -116,6 +106,11 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
             this.name = prop.name;
             this.buildingPattern = prop.buildingPattern;
             this.needsRepairing = prop.needsRepairing;
+            this.repairingTask = null;
+        }
+
+        private boolean needsRepairingSerializer() {
+            return needsRepairing || (repairingTask != null && repairingTask.isFinished());
         }
 
         public static <G extends Grids> Codec<BasicProperties<G>> codec(Codec<G> gCodec) {
@@ -125,7 +120,7 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
                             BuildingLocation.codec(gCodec).fieldOf("location").forGetter(p -> p.location),
                             Codec.STRING.fieldOf("name").forGetter(p -> p.name),
                             Codec.STRING.fieldOf("variant").forGetter(p -> p.buildingPattern),
-                            Codec.BOOL.fieldOf("needsRepairing").forGetter(p -> p.needsRepairing || p.repairingTask.get() != null)
+                            Codec.BOOL.fieldOf("needsRepairing").forGetter(BasicProperties::needsRepairingSerializer)
                     ).apply(instance, BasicProperties::new)
             );
         }

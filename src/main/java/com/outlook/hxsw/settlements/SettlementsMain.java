@@ -47,7 +47,7 @@ public class SettlementsMain {
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
-        SettlementsProxy.get(event.getServer()).startSidecar();
+        SettlementsProxy.get(event.getServer()).startDataSide();
     }
 
     @SubscribeEvent
@@ -57,7 +57,7 @@ public class SettlementsMain {
 
         int currentTick = event.getServer().getTickCount();
         if (currentTick % SIDECAR_TICK_RATE == 0) {
-            proxy.sidecarTick();
+            proxy.dataSideTick();
         }
     }
 
