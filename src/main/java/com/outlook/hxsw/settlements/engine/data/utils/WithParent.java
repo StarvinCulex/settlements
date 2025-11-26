@@ -2,8 +2,14 @@ package com.outlook.hxsw.settlements.engine.data.utils;
 
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
-public abstract class WithParent<P extends SidecarData> implements SidecarData {
+public abstract class WithParent<P extends SidecarData> extends SidecarData {
     private P parent = null;
+    private DataScheduler scheduler;
+    private final Class<P> parentClass;
+
+    public WithParent(Class<P> parentClass) {
+            this.parentClass = parentClass;
+    }
 
     /**
      * 可能是null。
@@ -12,21 +18,19 @@ public abstract class WithParent<P extends SidecarData> implements SidecarData {
         return parent;
     }
 
-    public final void setParent(P parent) {
+    @Override
+    void registeredByParent(SidecarData parent) {
+        P p = parentClass.cast(parent);
         if (this.parent != null) {
             throw new RuntimeException("Can't set parent twice");
         }
-        this.parent = parent;
-        if (scheduler() != null) {
-            this.registerToDataScheduler(scheduler());
-        }
+        this.parent = p;
+        this.scheduler = p.scheduler();
+        super.registeredByParent(parent);
     }
 
-    /**
-     * 可能是null
-     */
     @Override
     public final DataScheduler scheduler() {
-        return parent == null ? null : parent.scheduler();
+        return scheduler;
     }
 }

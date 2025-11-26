@@ -24,7 +24,8 @@ public abstract class CommandSettlements implements Command<CommandSourceStack> 
                 new CommandSettlementsListTown(),
                 new CommandSettlementsTownGetTerrain(),
                 new CommandSettlementsBuildingGetMeta(),
-                new CommandSettlementsTownTestBuild()
+                new CommandSettlementsTownTestBuild(),
+                new CommandSettlementsBuildingAddWorker()
         );
     }
 

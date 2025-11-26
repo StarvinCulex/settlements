@@ -4,10 +4,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.utils.*;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
+import com.outlook.hxsw.settlements.commercial.goods.Sellable;
+import com.outlook.hxsw.settlements.commercial.market.Stockpile;
 import com.outlook.hxsw.settlements.engine.buildings.*;
+import com.outlook.hxsw.settlements.engine.data.id.ID;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import com.outlook.hxsw.settlements.engine.grid.*;
+import com.outlook.hxsw.settlements.folk.job.HarvestFromField;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -23,7 +28,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     ) {
         super(variant.getDeclaringClass(), new FieldProperty(
                 id,
-                arg.neighbors().stream().findFirst().orElseThrow().getID(),
+                ID.of((HarvesterBuilding<?>) arg.neighbors().stream().findFirst().orElseThrow()),
                 arg.inner().inner(),
                 name,
                 variant.name()
@@ -39,12 +44,13 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
         return getProperties().growStage;
     }
 
-    public Optional<Harvester> getHarvester() {
-        var b = getParent().get(getProperties().harvesterID);
-        if (b.isPresent() && b.get() instanceof Harvester h) {
-            return Optional.of(h);
+    public final Stockpile harvest() {
+        Stockpile stockpile = new Stockpile();
+        if (getGrowStage() >= getType().growMaxStage()) {
+            stockpile.store(getType().harvest());
+            getProperties().growStage = 0;
         }
-        return Optional.empty();
+        return stockpile;
     }
 
     @Override
@@ -72,7 +78,9 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
             return;
         }
         if (++getProperties().growStage == getType().growMaxStage()) {
-            getHarvester().ifPresent(Harvester::harvest);
+            getProperties().harvesterID.get(getParent()).ifPresent(
+                    h -> h.getWorkGroup().addWork(HarvestFromField.make(h, this))
+            );
         }
         repair();
     }
@@ -82,8 +90,10 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
         int growTickCost();
         int growMaxStage();
         int masterDistance();
+        Map<Sellable, Integer> harvest();
+        int harvestPhaseCost();
 
-        default boolean harvesterSelector(Harvester building) {
+        default boolean harvesterSelector(HarvesterBuilding<?> building) {
             return true;
         }
 
@@ -102,7 +112,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
             BuildingsFilter filter = new BuildingsFilter(buildingSet);
             return requiringGrids.flatMap(filter.withCell())
                     .map(filter.connectTo(GridSide.SOUTH, connectablePredicate(this::fieldConnector)))
-                    .map(filter.near(masterDistance(), b -> b instanceof Harvester h && harvesterSelector(h)))
+                    .map(filter.near(masterDistance(), b -> b instanceof HarvesterBuilding<?> h && harvesterSelector(h)))
                     .filter(n -> !n.neighbors().isEmpty());
         }
 
@@ -115,11 +125,11 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     public static class FieldProperty extends ConnectiveProperties {
         private Integer timerPhase;
         private int growStage;
-        private int harvesterID;
+        private ID<BuildingSet, HarvesterBuilding<?>> harvesterID;
 
         protected FieldProperty(
                 int id,
-                int harvesterID,
+                ID<BuildingSet, HarvesterBuilding<?>> harvesterID,
                 BuildingLocation<GridCell> location,
                 String name,
                 String buildingPattern
@@ -130,7 +140,12 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
             this.harvesterID = harvesterID;
         }
 
-        protected FieldProperty(Optional<Integer> timerPhase, int growStage, int harvesterID, ConnectiveProperties prop) {
+        protected FieldProperty(
+                Optional<Integer> timerPhase,
+                int growStage,
+                ID<BuildingSet, HarvesterBuilding<?>> harvesterID,
+                ConnectiveProperties prop
+        ) {
             super(prop);
             this.timerPhase = timerPhase.orElse(null);
             this.growStage = growStage;
@@ -140,7 +155,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
         public static Codec<FieldProperty> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.INT.optionalFieldOf("timerPhase").forGetter(p -> Optional.ofNullable(p.timerPhase)),
                 Codec.INT.fieldOf("growStage").forGetter(p -> p.growStage),
-                Codec.INT.fieldOf("harvesterID").forGetter(p -> p.harvesterID),
+                ID.CODEC.fieldOf("harvesterID").forGetter(p -> p.harvesterID),
                 ConnectiveProperties.CODEC.fieldOf("connectiveProperties").forGetter(p -> p)
         ).apply(instance, FieldProperty::new));
     }

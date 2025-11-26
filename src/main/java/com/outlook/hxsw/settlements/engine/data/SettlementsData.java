@@ -3,21 +3,21 @@ package com.outlook.hxsw.settlements.engine.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.data.utils.SidecarData;
-import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
+import com.outlook.hxsw.settlements.engine.data.utils.Child;
 import com.outlook.hxsw.settlements.engine.folks.FolkSet;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
-public final class SettlementsData implements SidecarData {
+import java.util.Optional;
+
+public final class SettlementsData extends SidecarData {
     private DataScheduler dataScheduler;
 
-    public final TownSet towns;
-    public final FolkSet folks;
+    public final @Child TownSet towns;
+    public final @Child FolkSet folks;
 
     SettlementsData(TownSet towns, FolkSet folks) {
         this.towns = towns;
-        towns.setParent(this);
-
         this.folks = folks;
-        folks.setParent(this);
     }
 
     SettlementsData() {
@@ -25,9 +25,9 @@ public final class SettlementsData implements SidecarData {
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
+    protected void registerToDataScheduler(DataScheduler scheduler) {
         this.dataScheduler = scheduler;
-        this.towns.registerToDataScheduler(scheduler);
+        super.registerToDataScheduler(scheduler);
     }
 
     @Override

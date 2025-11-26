@@ -3,6 +3,7 @@ package com.outlook.hxsw.settlements.engine.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.buildings.BuildingSet;
+import com.outlook.hxsw.settlements.engine.data.utils.Child;
 import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
@@ -13,9 +14,10 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class Town extends WithParentAndID<TownSet> {
+    @Child public final BuildingSet buildings;
+
     private final GridRegion border;
     private String name;
-    private final BuildingSet buildingSet;
     private final ResourceKey<Level> dimension;
 
     public Town(
@@ -25,13 +27,11 @@ public class Town extends WithParentAndID<TownSet> {
             BuildingSet buildings,
             ResourceKey<Level> dimension
     ) {
-        super(id);
+        super(TownSet.class, id);
         this.name = name;
         this.border = border;
-        this.buildingSet = buildings;
+        this.buildings = buildings;
         this.dimension = Objects.requireNonNull(dimension);
-
-        this.buildingSet.setParent(this);
     }
 
     public Town(int id, String name, Vec3i center, ResourceKey<Level> dimension) {
@@ -51,7 +51,7 @@ public class Town extends WithParentAndID<TownSet> {
     }
 
     public BuildingSet buildings() {
-        return buildingSet;
+        return buildings;
     }
 
     public ResourceKey<Level> getDimensionKey() {
@@ -85,7 +85,7 @@ public class Town extends WithParentAndID<TownSet> {
 
     @Override
     public void registerToDataScheduler(DataScheduler scheduler) {
-        this.buildingSet.registerToDataScheduler(scheduler);
+        this.buildings.registerToDataScheduler(scheduler);
     }
 
 

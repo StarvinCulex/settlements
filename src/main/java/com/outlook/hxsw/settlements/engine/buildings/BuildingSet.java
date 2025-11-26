@@ -18,19 +18,18 @@ import java.util.function.*;
 import java.util.stream.Stream;
 
 public final class BuildingSet extends ChildContainer<Building, Town> {
-    final Map<Grid, Building> gridMap;
+    final Map<Grid, Building> gridMap = new HashMap<>();
     Map<Grid, GridTerrain> terrainMap;
 
     public BuildingSet() {
-        this.gridMap = new HashMap<>();
+        super(Town.class);
         this.terrainMap = new HashMap<>();
     }
 
-    public BuildingSet(int nextBuildingID, List<Building> buildings, Map<Grid, GridTerrain> terrainMap) {
-        super(nextBuildingID);
-        this.gridMap = new HashMap<>();
+    public BuildingSet(int nextBuildingID, Collection<Building> buildings, Map<Grid, GridTerrain> terrainMap) {
+        super(Town.class, nextBuildingID, buildings);
+        buildings.forEach(this::paintIntoGridMap);
         this.terrainMap = terrainMap;
-        addAll(buildings);
     }
 
     public Map<Grid, GridTerrain> getTerrainMap() {
@@ -73,15 +72,17 @@ public final class BuildingSet extends ChildContainer<Building, Town> {
 
     @Override
     protected void add(Building building) throws GridOccupiedException {
+        paintIntoGridMap(building);
+        super.add(building);
+    }
+
+    private void paintIntoGridMap(Building building) throws GridOccupiedException {
         Grids grids = building.getGrids();
         for (Grid g : grids) {
             if (gridMap.containsKey(g)) {
                 throw new GridOccupiedException(g, building, gridMap.get(g));
             }
         }
-
-        super.add(building);
-
         for (Grid g : grids) {
             gridMap.put(g, building);
         }

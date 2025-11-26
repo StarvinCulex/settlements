@@ -33,8 +33,6 @@ public class SettlementsMain {
     public SettlementsMain(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
 
-        RegisteredBuildings.register();
-
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         FolkEntity.ENTITY_TYPES.register(modEventBus);

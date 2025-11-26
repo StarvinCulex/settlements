@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.Optional;
 
 public final class TownSet extends ChildContainer<Town, SettlementsData> {
-    public TownSet() {}
+    public TownSet() {
+        super(SettlementsData.class);
+    }
 
     public TownSet(int nextChildID, List<Town> children) {
-        super(nextChildID);
+        super(SettlementsData.class);
         addAll(children);
     }
 

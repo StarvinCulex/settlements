@@ -15,6 +15,8 @@
   "command.settlements.err.town_not_found": "在(%s)的城镇未找到。",
   "command.settlements.err.source_null": "Source null.",
   "command.settlements.town.building.null": "在(%s)，城镇§n%s§r(%s)没有建筑。",
+  "command.settlements.town.building.unsupported": "建筑(%s)不支持此操作。",
+  "command.settlements.town.building.add_folk.success": "建筑成功添加市民。",
   "command.settlements.town.terrain.null": "在(%s)，城镇§n%s§r(%s)没有地形。",
   "command.settlements.town.test_building.empty": "测试失败。",
 

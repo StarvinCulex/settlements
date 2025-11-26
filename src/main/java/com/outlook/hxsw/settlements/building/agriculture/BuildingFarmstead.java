@@ -3,25 +3,46 @@ package com.outlook.hxsw.settlements.building.agriculture;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.road.Path;
-import com.outlook.hxsw.settlements.building.utils.BasicBuilding;
 import com.outlook.hxsw.settlements.building.utils.StructurePattern;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
+import com.outlook.hxsw.settlements.commercial.goods.Sellable;
+import com.outlook.hxsw.settlements.commercial.market.Shop;
+import com.outlook.hxsw.settlements.commercial.market.WithShop;
 import com.outlook.hxsw.settlements.engine.buildings.*;
+import com.outlook.hxsw.settlements.engine.data.utils.Child;
+import com.outlook.hxsw.settlements.engine.folks.job.WorkGroup;
 import com.outlook.hxsw.settlements.engine.grid.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public final class BuildingFarmstead extends BasicBuilding<BuildingFarmstead.Type> implements Harvester {
+public final class BuildingFarmstead extends HarvesterBuilding<BuildingFarmstead.Type>
+        implements WithShop {
     public static final int MASTERING_DISTANCE = 16;
     public static final int INCOMPATIBLE_DISTANCE = MASTERING_DISTANCE * 2 + 4;
 
-    private BuildingFarmstead(int id, Type pattern, ConnectionArgument<FacingArgument<BuildingLocation<GridRegion>>> location) {
+    private final Shop shop;
+    @Child public final WorkGroup<BuildingFarmstead> workGroup;
+
+    private static final List<Sellable> GOODS = Arrays.stream(BuildingFarmField.Type.values())
+            .flatMap(t -> t.harvest().keySet().stream()).toList();
+
+    private BuildingFarmstead(
+            int id,
+            Type pattern,
+            ConnectionArgument<FacingArgument<BuildingLocation<GridRegion>>> location
+    ) {
         super(id, pattern, location.inner(), pattern.getName());
+        this.shop = new Shop(GOODS);
+        this.workGroup = new WorkGroup<>(BuildingFarmstead.class);
     }
 
-    private BuildingFarmstead(BasicProperties properties) {
+    private BuildingFarmstead(BasicProperties properties, Shop shop, WorkGroup<BuildingFarmstead> workGroup) {
         super(Type.class, properties);
+        this.shop = shop;
+        this.workGroup = workGroup;
     }
 
     @Override
@@ -30,12 +51,19 @@ public final class BuildingFarmstead extends BasicBuilding<BuildingFarmstead.Typ
     }
 
     @Override
-    public void harvest() {
+    public Shop getStock() {
+        return shop;
+    }
 
+    @Override
+    public WorkGroup<BuildingFarmstead> getWorkGroup() {
+        return workGroup;
     }
 
     public static Codec<BuildingFarmstead> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            BasicProperties.CODEC.fieldOf("properties").forGetter(BuildingFarmstead::getProperties)
+            BasicProperties.CODEC.fieldOf("properties").forGetter(BuildingFarmstead::getProperties),
+            Shop.CODEC.fieldOf("shop").forGetter(BuildingFarmstead::getStock),
+            WorkGroup.codec(BuildingFarmstead.class).fieldOf("workGroup").forGetter(BuildingFarmstead::getWorkGroup)
     ).apply(instance, BuildingFarmstead::new));
 
     public enum Type implements Supplier<StructurePattern>,

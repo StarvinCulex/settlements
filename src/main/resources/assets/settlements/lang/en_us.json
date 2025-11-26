@@ -14,6 +14,8 @@
   "command.settlements.town.buildings.no_elements": "Town §n%s§r(%s) has no building.",
   "command.settlements.town.terrain.null": "There is no terrain at (%s) in town §n%s§r(%s).",
   "command.settlements.town.building.null": "There is no building at (%s) in town §n%s§r(%s).",
+  "command.settlements.town.building.unsupported": "Building (%s) does not support this operation.",
+  "command.settlements.town.building.add_folk.success": "Building add folks successfully",
   "command.settlements.err.town_not_found": "Town at (%s) not found.",
   "command.settlements.err.source_null": "Source null.",
   "command.settlements.town.test_building.empty": "Test failed.",

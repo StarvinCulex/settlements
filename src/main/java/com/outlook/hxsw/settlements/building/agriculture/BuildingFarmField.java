@@ -4,13 +4,17 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.building.utils.filter.*;
 import com.outlook.hxsw.settlements.building.utils.*;
+import com.outlook.hxsw.settlements.commercial.goods.GoodsItem;
+import com.outlook.hxsw.settlements.commercial.goods.Sellable;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.grid.*;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Type> {
@@ -44,22 +48,35 @@ public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Typ
     ).apply(instance, BuildingFarmField::new));
 
     public enum Type implements Supplier<ConnectiveBuildingPattern>, FieldBuilding.Type<BuildingFarmField> {
-        WHEAT("wheat_field", Blocks.WHEAT, 7, BlockStateProperties.AGE_7),
-        CARROT("carrot_field", Blocks.CARROTS, 7, BlockStateProperties.AGE_7),
-        POTATO("potato_field", Blocks.POTATOES, 7, BlockStateProperties.AGE_7),
-        BEETROOT("beetroot_field", Blocks.BEETROOTS, 3, BlockStateProperties.AGE_3)
+        WHEAT("wheat_field", Blocks.WHEAT, 7, BlockStateProperties.AGE_7, Map.of(
+                GoodsItem.of(Items.WHEAT), 64,
+                GoodsItem.of(Items.WHEAT_SEEDS), 32
+        )),
+        CARROT("carrot_field", Blocks.CARROTS, 7, BlockStateProperties.AGE_7, Map.of(
+                GoodsItem.of(Items.CARROT), 128
+        )),
+        POTATO("potato_field", Blocks.POTATOES, 7, BlockStateProperties.AGE_7, Map.of(
+                GoodsItem.of(Items.POTATO), 128,
+                GoodsItem.of(Items.POISONOUS_POTATO), 1
+        )),
+        BEETROOT("beetroot_field", Blocks.BEETROOTS, 3, BlockStateProperties.AGE_3, Map.of(
+                GoodsItem.of(Items.BEETROOT), 64,
+                GoodsItem.of(Items.BEETROOT_SEEDS), 32
+        ))
         ;
 
         private final String name;
         private final Block plant;
         private final int growMaxStage;
         private final IntegerProperty plantAgeProperty;
+        private final Map<Sellable, Integer> harvest;
 
-        Type(String name, Block plant, int growMaxStage, IntegerProperty plantAgeProperty) {
+        Type(String name, Block plant, int growMaxStage, IntegerProperty plantAgeProperty, Map<Sellable, Integer> harvest) {
             this.name = name;
             this.plant = plant;
             this.growMaxStage = growMaxStage;
             this.plantAgeProperty = plantAgeProperty;
+            this.harvest = harvest;
         }
 
         @Override
@@ -75,6 +92,16 @@ public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Typ
         @Override
         public int masterDistance() {
             return BuildingFarmstead.MASTERING_DISTANCE;
+        }
+
+        @Override
+        public Map<Sellable, Integer> harvest() {
+            return harvest;
+        }
+
+        @Override
+        public int harvestPhaseCost() {
+            return 10;
         }
 
         @Override
