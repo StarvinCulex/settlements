@@ -1,5 +1,6 @@
 package com.outlook.hxsw.settlements.engine.schedule;
 
+import com.outlook.hxsw.settlements.engine.data.SettlementsTable;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.Set;
@@ -12,6 +13,8 @@ public interface ServerScheduler {
      * 获取底层的MinecraftServer对象。
      */
     MinecraftServer server();
+    
+    SettlementsTable table();
 
     Set<Trigger> triggers();
 

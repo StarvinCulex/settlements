@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class ConnectiveBuildingPattern {
     private final String dirPath;
-    private final int groundSurfaceY;
+    final int groundSurfaceY;
     private final int cornerSize;
 
     public ConnectiveBuildingPattern(

@@ -3,8 +3,12 @@ package com.outlook.hxsw.settlements.folk.job.move;
 import com.mojang.serialization.Codec;
 import com.outlook.hxsw.settlements.commercial.market.Stockpile;
 import com.outlook.hxsw.settlements.engine.data.codecs.CodecType;
+import com.outlook.hxsw.settlements.engine.folks.Folk;
 import com.outlook.hxsw.settlements.engine.folks.job.Jobs;
 import com.outlook.hxsw.settlements.engine.folks.pos.FolkPos;
+import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
+import com.outlook.hxsw.settlements.entities.folk.FolkAction;
+import com.outlook.hxsw.settlements.folk.action.move.ActionCarryItems;
 
 public final class CarryItems extends AbstractMoveTo<Stockpile> {
     public static Jobs<Stockpile, Stockpile> of(FolkPos origin, FolkPos destination) {
@@ -20,6 +24,11 @@ public final class CarryItems extends AbstractMoveTo<Stockpile> {
     @Override
     public CodecType<?> getType() {
         return Type.INSTANCE;
+    }
+
+    @Override
+    protected ActionCarryItems generateAction(Folk folk, Stockpile input) {
+        return new ActionCarryItems(destination, input);
     }
 
     public static final class Type implements CodecType<CarryItems> {

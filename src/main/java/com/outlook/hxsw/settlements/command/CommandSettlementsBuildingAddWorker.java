@@ -45,7 +45,7 @@ public class CommandSettlementsBuildingAddWorker extends CommandSettlementsBuild
         }
         FolkSet folkSet = building.scheduler().data().folks;;
         WorkGroup<?> workGroup = wg.getWorkGroup();
-        InBuilding pos = new InBuilding(building);
+        InBuilding pos = building.getFolkPos();
         for (int i = 0; i < count; i++) {
             Folk folk = folkSet.newFolk(pos);
             folk.addMaster(workGroup);

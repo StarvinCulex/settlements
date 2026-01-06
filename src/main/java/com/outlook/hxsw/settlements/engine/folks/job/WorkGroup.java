@@ -37,10 +37,10 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
     }
 
     public <I> Work addWork(I input, Jobs<I, ?> jobs) {
-        return addWork(new JobNodeWithInput<>(input, jobs.intoNode()));
+        return addWork(new JobNodeWithInput<>(input, jobs.export()));
     }
 
-    public <I> Work addWork(I input, Job<I, ?> job) {
+    public <I> Work addWork(I input, Job<I, ?, ?> job) {
         return addWork(new JobNodeWithInput<>(input, new JobNode<>(job, null)));
     }
 
@@ -48,7 +48,7 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
         return addWork(null, jobs);
     }
 
-    public Work addWork(Job<Void, ?> job) {
+    public Work addWork(Job<Void, ?, ?> job) {
         return addWork(null, job);
     }
 
@@ -74,6 +74,9 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
         consume(Objects.requireNonNull(scheduler()));
     }
 
+    /**
+     * 忙碌状态的folk无法remove
+     */
     @Override
     protected boolean tryRemove(Folk folk) {
         var id = FolkID.of(folk);
@@ -102,7 +105,7 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
         return folk;
     }
 
-    private Work addWork(JobNodeWithInput<?, ?> job) {
+    private Work addWork(JobNodeWithInput<?, ?, ?> job) {
         Work work = new Work(job);
         work.addCallback(this);
         waitingWorks.add(work);
@@ -121,7 +124,7 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
+    public void registerToDataScheduler(DataScheduler scheduler) {  // TODO 检查调用时机是否“严格一次”
         super.registerToDataScheduler(scheduler);
         for (Work work : activatingWorks.values()) {
             work.run(scheduler);
@@ -133,6 +136,7 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
         var workerID = work.workerID;
         activatingWorks.remove(workerID);
         idleWorkers.add(workerID);
+        consume(scheduler);
     }
 
     protected List<FolkID> getIdleWorkerIDs() {

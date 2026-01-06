@@ -40,7 +40,7 @@ public abstract class FolkMaster<P extends SidecarData> extends WithParent<P> {
             return Optional.empty();
         }
         var id = it.next();
-        folks.remove(id);
+        it.remove();
         return id.get(scheduler().data().folks);
     }
 

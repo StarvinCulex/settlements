@@ -12,15 +12,18 @@ import com.outlook.hxsw.settlements.engine.folks.job.Job;
 import com.outlook.hxsw.settlements.engine.folks.job.Jobs;
 import com.outlook.hxsw.settlements.engine.folks.pos.InBuilding;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
+import com.outlook.hxsw.settlements.entities.folk.FolkAction;
+import com.outlook.hxsw.settlements.folk.action.ActionEmpty;
+import com.outlook.hxsw.settlements.folk.action.build.ActionHarvestFromField;
 import com.outlook.hxsw.settlements.folk.job.move.CarryItems;
 import com.outlook.hxsw.settlements.folk.job.move.MoveTo;
 
-public class HarvestFromField extends Job<Void, Stockpile> {
+public class HarvestFromField extends Job<Void, Void, Stockpile> {
     public static Jobs<Void, Void> make(HarvesterBuilding<?> harvester, FieldBuilding<?> field) {
-        return MoveTo.of(new InBuilding(harvester), new InBuilding(field))
-                .then(new HarvestFromField(field))
-                .then(CarryItems.of(new InBuilding(field), new InBuilding(harvester)))
-                .then(new StoreItems(harvester));
+        return MoveTo.of(harvester.getFolkPos(), field.getFolkPos()) // 从工作站移动到田地
+                .then(new HarvestFromField(field))  // 收获田地
+                .then(CarryItems.of(field.getFolkPos(), harvester.getFolkPos())) // 返回到工作站
+                .then(new StoreItems(harvester));  // 提交收获物
     }
 
     private final BuildingID<FieldBuilding<?>> targetBuildingID;
@@ -47,6 +50,19 @@ public class HarvestFromField extends Job<Void, Stockpile> {
     @Override
     protected Codec<Void> inputCodec() {
         return Codec.unit(null);
+    }
+
+    @Override
+    protected FolkAction<Void> generateAction(Folk folk, Void input) {
+        return targetBuildingID.get(folk)
+                .map(ActionHarvestFromField::new)
+                .map(v -> (FolkAction<Void>) v)
+                .orElseGet(() -> new ActionEmpty<>(null));
+    }
+
+    @Override
+    protected Stockpile afterAction(Folk folk, DataScheduler scheduler, Void ignored) {
+        return simulate(folk, scheduler, null);
     }
 
     @Override

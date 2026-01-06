@@ -26,3 +26,11 @@ run-data
 .continue
 
 repo
+
+# 忽略macOS的隐藏文件
+.DS_Store
+# 放行 src/main 下任意层级的 build 目录及其内容，因为上面有忽略build目录。
+!src/
+!src/main/
+!src/main/**/build/
+!src/main/**/build/**

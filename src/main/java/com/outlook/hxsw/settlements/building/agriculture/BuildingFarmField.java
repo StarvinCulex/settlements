@@ -7,6 +7,7 @@ import com.outlook.hxsw.settlements.building.utils.*;
 import com.outlook.hxsw.settlements.commercial.goods.GoodsItem;
 import com.outlook.hxsw.settlements.commercial.goods.Sellable;
 import com.outlook.hxsw.settlements.engine.buildings.*;
+import com.outlook.hxsw.settlements.engine.folks.pos.InBuilding;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Type> {
@@ -41,6 +43,11 @@ public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Typ
                         getType().plant.defaultBlockState().setValue(getType().plantAgeProperty, getGrowStage())
                 )
         };
+    }
+
+    @Override
+    public InBuilding getFolkPos() {
+        return new InBuilding(this, Set.of(getType().plant));
     }
 
     public static final Codec<BuildingFarmField> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -97,6 +104,11 @@ public final class BuildingFarmField extends FieldBuilding<BuildingFarmField.Typ
         @Override
         public Map<Sellable, Integer> harvest() {
             return harvest;
+        }
+
+        @Override
+        public Set<Block> harvestBlocks() {
+            return Set.of(plant);
         }
 
         @Override

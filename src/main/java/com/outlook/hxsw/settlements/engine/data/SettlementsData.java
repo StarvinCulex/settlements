@@ -7,10 +7,10 @@ import com.outlook.hxsw.settlements.engine.data.utils.Child;
 import com.outlook.hxsw.settlements.engine.folks.FolkSet;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
-import java.util.Optional;
-
 public final class SettlementsData extends SidecarData {
     private DataScheduler dataScheduler;
+
+    public final SettlementsTable syncTable;
 
     public final @Child TownSet towns;
     public final @Child FolkSet folks;
@@ -18,6 +18,7 @@ public final class SettlementsData extends SidecarData {
     SettlementsData(TownSet towns, FolkSet folks) {
         this.towns = towns;
         this.folks = folks;
+        this.syncTable = new SettlementsTable(folks.zoneTable);
     }
 
     SettlementsData() {

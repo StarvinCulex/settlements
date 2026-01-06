@@ -8,12 +8,16 @@ import com.outlook.hxsw.settlements.commercial.goods.Sellable;
 import com.outlook.hxsw.settlements.commercial.market.Stockpile;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.data.id.ID;
+import com.outlook.hxsw.settlements.engine.folks.pos.FolkPos;
+import com.outlook.hxsw.settlements.engine.folks.pos.InBuilding;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import com.outlook.hxsw.settlements.engine.grid.*;
 import com.outlook.hxsw.settlements.folk.job.HarvestFromField;
+import net.minecraft.world.level.block.Block;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -42,6 +46,10 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
 
     public final int getGrowStage() {
         return getProperties().growStage;
+    }
+
+    public final InBuilding harvestPos() {
+        return new InBuilding(this, getType().harvestBlocks());
     }
 
     public final Stockpile harvest() {
@@ -92,6 +100,7 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
         int masterDistance();
         Map<Sellable, Integer> harvest();
         int harvestPhaseCost();
+        Set<Block> harvestBlocks();
 
         default boolean harvesterSelector(HarvesterBuilding<?> building) {
             return true;

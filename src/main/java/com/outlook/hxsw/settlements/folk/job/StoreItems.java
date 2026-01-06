@@ -11,8 +11,9 @@ import com.outlook.hxsw.settlements.engine.data.id.BuildingID;
 import com.outlook.hxsw.settlements.engine.folks.Folk;
 import com.outlook.hxsw.settlements.engine.folks.job.Job;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
+import com.outlook.hxsw.settlements.folk.action.ActionEmpty;
 
-public class StoreItems extends Job<Stockpile, Void> {
+public class StoreItems extends Job<Stockpile, Void, Void> {
     private final BuildingID<Building> targetBuildingID;
 
     public <B extends Building & WithStockpile> StoreItems(B target) {
@@ -57,6 +58,14 @@ public class StoreItems extends Job<Stockpile, Void> {
     protected Codec<Stockpile> inputCodec() {
         return Stockpile.CODEC;
     }
+
+    @Override
+    protected ActionEmpty<Void> generateAction(Folk folk, Stockpile input) {
+        return new ActionEmpty<>(null);
+    }
+
+    @Override
+    protected Void afterAction(Folk folk, DataScheduler scheduler, Void output) {return null;}
 
     static final class Type implements CodecType<StoreItems> {
         public static final Type INSTANCE = new Type();

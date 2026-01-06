@@ -1,6 +1,7 @@
 package com.outlook.hxsw.settlements.engine.schedule;
 
 import com.outlook.hxsw.settlements.engine.data.SettlementsData;
+import com.outlook.hxsw.settlements.engine.data.SettlementsTable;
 import net.minecraft.server.MinecraftServer;
 
 import javax.annotation.Nullable;
@@ -45,6 +46,10 @@ public class ScheduleController {
 
     public final void dataSchedule(VoidTask<DataScheduler> task) {
         dataTaskQueue.add(OnceTask.from(task));
+    }
+
+    public final SettlementsTable getTable() {
+        return dataSide.data.syncTable;
     }
 
     public final <R> ScheduledTask<DataScheduler, R> dataSchedule(Task<DataScheduler, R> task) {
@@ -176,6 +181,11 @@ public class ScheduleController {
         @Override
         public MinecraftServer server() {
             return server;
+        }
+
+        @Override
+        public SettlementsTable table() {
+            return dataSide.data.syncTable; // ?
         }
 
         @Override

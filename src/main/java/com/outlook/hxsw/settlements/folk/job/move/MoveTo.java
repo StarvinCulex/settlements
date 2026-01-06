@@ -2,8 +2,11 @@ package com.outlook.hxsw.settlements.folk.job.move;
 
 import com.mojang.serialization.Codec;
 import com.outlook.hxsw.settlements.engine.data.codecs.CodecType;
+import com.outlook.hxsw.settlements.engine.folks.Folk;
 import com.outlook.hxsw.settlements.engine.folks.job.Jobs;
 import com.outlook.hxsw.settlements.engine.folks.pos.FolkPos;
+import com.outlook.hxsw.settlements.entities.folk.FolkAction;
+import com.outlook.hxsw.settlements.folk.action.move.ActionMoveTo;
 
 public final class MoveTo extends AbstractMoveTo<Void> {
     public static Jobs<Void, Void> of(FolkPos origin, FolkPos destination) {
@@ -19,6 +22,11 @@ public final class MoveTo extends AbstractMoveTo<Void> {
     @Override
     public CodecType<?> getType() {
         return Type.INSTANCE;
+    }
+
+    @Override
+    protected ActionMoveTo generateAction(Folk folk, Void input) {
+        return new ActionMoveTo(destination);
     }
 
     public static final class Type implements CodecType<MoveTo> {

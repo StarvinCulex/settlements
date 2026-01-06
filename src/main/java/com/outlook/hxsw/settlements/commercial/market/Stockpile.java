@@ -19,6 +19,18 @@ public class Stockpile implements Stock {
         }
     }
 
+    public Stockpile(Map<Sellable, Integer> items) {
+        this.count = items.values().stream().reduce(0, Integer::sum);
+        this.items.putAll(items);
+    }
+
+    public static Stockpile copyOf(Stockpile src) {
+        Stockpile dest = new Stockpile();
+        dest.count = src.count;
+        dest.items.putAll(src.items);
+        return dest;
+    }
+
     public final boolean isEmpty() {
         return count == 0;
     }

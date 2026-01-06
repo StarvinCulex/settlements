@@ -1,11 +1,12 @@
 package com.outlook.hxsw.settlements;
 
 import com.mojang.logging.LogUtils;
-import com.outlook.hxsw.settlements.building.RegisteredBuildings;
+import com.outlook.hxsw.settlements.client.SettlementsClient;
 import com.outlook.hxsw.settlements.command.CommandSettlements;
 import com.outlook.hxsw.settlements.engine.data.*;
-import com.outlook.hxsw.settlements.entities.FolkEntity;
+import com.outlook.hxsw.settlements.entities.folk.FolkEntity;
 import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -32,16 +33,21 @@ public class SettlementsMain {
 
     public SettlementsMain(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(FolkEntity::registerSpawnPlacements);
 
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        FolkEntity.ENTITY_TYPES.register(modEventBus);
+        ENTITIES.register(modEventBus);
 
         CommandSettlements.getCommands().forEach(NeoForge.EVENT_BUS::register);
         NeoForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {}
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            LOGGER.info("[Registry] Registered entity type: {}", FolkEntity.FOLK.get().builtInRegistryHolder().key().location());
+        });
+    }
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {

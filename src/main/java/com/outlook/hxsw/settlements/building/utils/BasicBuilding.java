@@ -30,6 +30,11 @@ public abstract class BasicBuilding<P extends Enum<P> & Supplier<StructurePatter
     }
 
     @Override
+    public int getFootingY() {
+        return getGroundY() - getBuildingPattern().get().groundSurfaceY;
+    }
+
+    @Override
     public Task<ServerScheduler, Void> getBuilder() {
         return getBuildingPattern().get().build(
                 getDimension(),

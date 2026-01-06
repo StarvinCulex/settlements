@@ -28,6 +28,9 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
         this.buildingPattern = P.valueOf(patternClass, properties.buildingPattern);
     }
 
+    @Override
+    public abstract int getFootingY();
+
     protected abstract Task<ServerScheduler, Void> getBuilder();
 
     public final void repair() {

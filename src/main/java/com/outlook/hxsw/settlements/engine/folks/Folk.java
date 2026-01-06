@@ -14,11 +14,11 @@ public final class Folk extends WithParentAndID<FolkSet> {
     FolkMaster<?> master = null; // 由FolkMaster初始化此字段。
 
     Folk(int id, FolkPos pos) {
-        this(id, new FolkShareZone(pos, new FolkMeta("folk")));
+        this(new FolkShareZone(id, pos, new FolkMeta("folk")));
     }
 
-    Folk(int id, FolkShareZone zone) {
-        super(FolkSet.class, id);
+    Folk(FolkShareZone zone) {
+        super(FolkSet.class, zone.id);
         this.zone = zone;
     }
 
@@ -45,13 +45,17 @@ public final class Folk extends WithParentAndID<FolkSet> {
         return false;
     }
 
+    public void kill() {
+        tryRemoveMaster();
+        getParent().remove(id);
+    }
+
     @Override
     public void registerToDataScheduler(DataScheduler scheduler) {
 
     }
 
     public static final Codec<Folk> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("id").forGetter(Folk::getID),
             FolkShareZone.CODEC.fieldOf("zone").forGetter(f -> f.zone)
     ).apply(instance, Folk::new));
 }

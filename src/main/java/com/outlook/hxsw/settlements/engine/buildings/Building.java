@@ -5,9 +5,16 @@ import com.mojang.serialization.Codec;
 import com.outlook.hxsw.settlements.building.RegisteredBuildings;
 import com.outlook.hxsw.settlements.engine.data.codecs.CodecElement;
 import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
+import com.outlook.hxsw.settlements.engine.folks.pos.InBuilding;
 import com.outlook.hxsw.settlements.engine.grid.Grids;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+
+import java.util.Set;
+import java.util.function.Function;
 
 public abstract class Building extends WithParentAndID<BuildingSet> implements CodecElement {
     public Building(int id) {
@@ -30,6 +37,15 @@ public abstract class Building extends WithParentAndID<BuildingSet> implements C
 
     public final int getGroundY() {
         return getLocation().groundY();
+    }
+
+    public int getFootingY() {
+        return getGroundY();
+    }
+
+    private static final Set<Block> DEFAULT_PLACE_ON = Set.of(Blocks.DIRT_PATH, Blocks.GRASS_BLOCK);
+    public InBuilding getFolkPos() {
+        return new InBuilding(this, DEFAULT_PLACE_ON);
     }
 
     public final Grids getGrids() {

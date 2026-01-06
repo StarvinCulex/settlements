@@ -66,6 +66,11 @@ public abstract class ConnectiveBuilding<P extends Enum<P> & Supplier<Connective
     }
 
     @Override
+    public int getFootingY() {
+        return getGroundY() - getBuildingPattern().get().groundSurfaceY;
+    }
+
+    @Override
     public Task<ServerScheduler, Void> getBuilder() {
         return getBuildingPattern().get().generateBuilder(getLocation(), getConnections(), patternOptions());
     }

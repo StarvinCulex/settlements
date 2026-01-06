@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public class StructurePattern {
     private final String path;
-    private final int groundSurfaceY;
+    final int groundSurfaceY;
     private final int xLen;
     private final int zLen;
 
