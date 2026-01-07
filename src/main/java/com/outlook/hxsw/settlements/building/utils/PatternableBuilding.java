@@ -76,7 +76,8 @@ public abstract class PatternableBuilding<G extends Grids, P extends Enum<P>> ex
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
+    protected void onRegistering(DataScheduler scheduler) {
+        super.onRegistering(scheduler);
         if (getProperties().needsRepairing) {
             repair();
         }

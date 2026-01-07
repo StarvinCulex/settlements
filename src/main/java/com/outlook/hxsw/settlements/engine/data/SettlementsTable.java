@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class SettlementsTable {
     private final ConcurrentHashMap<Integer, FolkShareZone> folkZone;
 
-    SettlementsTable(ConcurrentHashMap<Integer, FolkShareZone> folkZone) {
+    public SettlementsTable(ConcurrentHashMap<Integer, FolkShareZone> folkZone) {
         this.folkZone = folkZone;
     }
 

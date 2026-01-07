@@ -6,7 +6,6 @@ import com.outlook.hxsw.settlements.engine.buildings.BuildingSet;
 import com.outlook.hxsw.settlements.engine.data.utils.Child;
 import com.outlook.hxsw.settlements.engine.data.utils.WithParentAndID;
 import com.outlook.hxsw.settlements.engine.grid.*;
-import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -14,7 +13,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class Town extends WithParentAndID<TownSet> {
-    @Child public final BuildingSet buildings;
+    @Child
+    public final BuildingSet buildings;
 
     private final GridRegion border;
     private String name;
@@ -82,12 +82,6 @@ public class Town extends WithParentAndID<TownSet> {
                     Level.RESOURCE_KEY_CODEC.fieldOf("dimension").forGetter(Town::getDimensionKey)
             ).apply(instance, Town::new)
     );
-
-    @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
-        this.buildings.registerToDataScheduler(scheduler);
-    }
-
 
     public static class OverlapException extends RuntimeException {
         private final Town conflictTown;

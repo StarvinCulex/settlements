@@ -45,7 +45,7 @@ public abstract class FolkMaster<P extends SidecarData> extends WithParent<P> {
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
+    protected void onRegistering(DataScheduler scheduler) {
         for (var id : folks) {
             Folk folk = id.get(scheduler.data().folks).orElseThrow();
             folk.master = this;

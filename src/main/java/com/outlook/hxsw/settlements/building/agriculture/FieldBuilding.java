@@ -8,7 +8,6 @@ import com.outlook.hxsw.settlements.commercial.goods.Sellable;
 import com.outlook.hxsw.settlements.commercial.market.Stockpile;
 import com.outlook.hxsw.settlements.engine.buildings.*;
 import com.outlook.hxsw.settlements.engine.data.id.ID;
-import com.outlook.hxsw.settlements.engine.folks.pos.FolkPos;
 import com.outlook.hxsw.settlements.engine.folks.pos.InBuilding;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 import com.outlook.hxsw.settlements.engine.grid.*;
@@ -70,8 +69,8 @@ public abstract class FieldBuilding<P extends Enum<P> & Supplier<ConnectiveBuild
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
-        super.registerToDataScheduler(scheduler);
+    protected void onRegistering(DataScheduler scheduler) {
+        super.onRegistering(scheduler);
         if (timerIsSet) {
             if (getProperties().timerPhase == null) {
                 getProperties().timerPhase = scheduler.getPhase();

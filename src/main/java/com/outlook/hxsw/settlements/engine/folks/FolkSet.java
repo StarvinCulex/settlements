@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.outlook.hxsw.settlements.engine.data.SettlementsData;
 import com.outlook.hxsw.settlements.engine.data.utils.ChildContainer;
 import com.outlook.hxsw.settlements.engine.folks.pos.FolkPos;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;

@@ -2,8 +2,8 @@ package com.outlook.hxsw.settlements.engine.folks.job;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.outlook.hxsw.settlements.engine.data.utils.SidecarData;
 import com.outlook.hxsw.settlements.engine.data.id.FolkID;
-import com.outlook.hxsw.settlements.engine.data.utils.*;
 import com.outlook.hxsw.settlements.engine.folks.*;
 import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
 
@@ -124,8 +124,8 @@ public class WorkGroup<P extends SidecarData> extends FolkMaster<P> implements W
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {  // TODO 检查调用时机是否“严格一次”
-        super.registerToDataScheduler(scheduler);
+    protected void onRegistering(DataScheduler scheduler) {
+        super.onRegistering(scheduler);
         for (Work work : activatingWorks.values()) {
             work.run(scheduler);
         }

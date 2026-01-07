@@ -52,8 +52,8 @@ public final class BuildingSet extends ChildContainer<Building, Town> {
     }
 
     @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
-        super.registerToDataScheduler(scheduler);
+    protected void onRegistering(DataScheduler scheduler) {
+        super.onRegistering(scheduler);
         if (terrainMap.isEmpty()) {
             System.out.println("BuildingSet of " + getParent() + " is empty. Make a TerrainSurveyor to survey.");
             scheduler.schedule(new TerrainSurveyor(this.getParent()));

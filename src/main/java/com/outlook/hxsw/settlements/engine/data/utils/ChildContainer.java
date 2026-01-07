@@ -1,11 +1,9 @@
 package com.outlook.hxsw.settlements.engine.data.utils;
 
-import com.outlook.hxsw.settlements.engine.schedule.DataScheduler;
-
 import java.util.*;
 
 @SuppressWarnings("rawtypes")
-public class ChildContainer<C extends WithParentAndID, P extends SidecarData> extends WithParent<P> {
+public abstract class ChildContainer<C extends WithParentAndID, P extends SidecarData> extends WithParent<P> {
     private int nextChildID = 1;
     private final Map<Integer, C> children = new HashMap<>();
 
@@ -16,9 +14,7 @@ public class ChildContainer<C extends WithParentAndID, P extends SidecarData> ex
     public ChildContainer(Class<P> parentClass, int nextChildID, Collection<C> children) {
         super(parentClass);
         this.nextChildID = nextChildID;
-        for (var c : children) {
-            this.children.put(c.id, c);
-        }
+        addAll(children);
     }
 
     public Optional<C> get(int id) {
@@ -45,7 +41,9 @@ public class ChildContainer<C extends WithParentAndID, P extends SidecarData> ex
         if (children.putIfAbsent(child.id, child) != null) {
             throw new IllegalArgumentException("duplicated id " + child.id);
         }
-        child.registeredByParent(this);
+        if (scheduler() != null) {
+            child.registerParent(this);
+        }
     }
 
     protected void addAll(Collection<C> children) {
@@ -60,10 +58,10 @@ public class ChildContainer<C extends WithParentAndID, P extends SidecarData> ex
     }
 
     @Override
-    void onRegistered(DataScheduler scheduler) {
-        super.onRegistered(scheduler);
+    void registerChildren() {
+        super.registerChildren();
         for (C child : children.values()) {
-            child.registeredByParent(this);
+            child.registerParent(this);
         }
     }
 }

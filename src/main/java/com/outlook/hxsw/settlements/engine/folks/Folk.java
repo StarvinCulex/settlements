@@ -50,11 +50,6 @@ public final class Folk extends WithParentAndID<FolkSet> {
         getParent().remove(id);
     }
 
-    @Override
-    public void registerToDataScheduler(DataScheduler scheduler) {
-
-    }
-
     public static final Codec<Folk> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             FolkShareZone.CODEC.fieldOf("zone").forGetter(f -> f.zone)
     ).apply(instance, Folk::new));

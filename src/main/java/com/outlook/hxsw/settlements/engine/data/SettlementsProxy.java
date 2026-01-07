@@ -38,8 +38,8 @@ public class SettlementsProxy extends ScheduleController {
 
     private SettlementsProxy(Path savePath, SettlementsData data, int phase) {
         super(data, phase);
-        data.registerToDataScheduler(getDataSide());
         this.savePath = savePath;
+        data.register(getDataSide());
     }
 
     private static Path getSavePath(MinecraftServer server) {
